@@ -4,17 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.net.URLEncoder;
 import java.util.Map;
 
@@ -45,11 +42,26 @@ public class HttpClientUtil {
 
             // 创建http GET请求
             HttpGet httpGet = new HttpGet(url);
+            long start = System.currentTimeMillis();
             // 执行请求
             response = httpclient.execute(httpGet);
             // 判断返回状态是否为200
+            long end = System.currentTimeMillis();
             if (response.getStatusLine().getStatusCode() == 200) {
                 resultString = EntityUtils.toString(response.getEntity(), DEF_CHATSET);
+                log.info("执行时间{}",end-start);
+            } else if (response.getStatusLine().getStatusCode() == 232) {
+                log.error("分销商参数验证无效");
+            } else if (response.getStatusLine().getStatusCode() == 233) {
+                log.error("接口频次超频");
+            } else if (response.getStatusLine().getStatusCode() == 234) {
+                log.error("背后服务转发失败\t");
+            } else if (response.getStatusLine().getStatusCode() == 235) {
+                log.error("错误比例过高造成熔断\t");
+            } else if (response.getStatusLine().getStatusCode() == 1001) {
+                log.error("缺失Auth请求参数");
+            } else if (response.getStatusLine().getStatusCode() == 1005) {
+                log.error("重置Token密钥失效\t");
             }
         } catch (Exception e) {
             log.error("{}方法中http请求发生异常:{}", HttpClientUtil.class.getName(), e.getMessage());
