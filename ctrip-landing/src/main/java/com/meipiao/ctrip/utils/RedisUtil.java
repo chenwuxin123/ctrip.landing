@@ -571,6 +571,23 @@ public class RedisUtil {
         }
     }
 
+    /**
+     * setnx
+     *
+     * @param key   键
+     * @param value 值
+     * @param time  过期时间/s
+     * @return
+     */
+    public boolean setnx(String key, Object value, long time) {
+        try {
+            redisTemplate.opsForValue().setIfAbsent(key, value, time, TimeUnit.SECONDS);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
 
 
