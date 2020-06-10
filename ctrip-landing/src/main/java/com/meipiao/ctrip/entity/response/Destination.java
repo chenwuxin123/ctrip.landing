@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 全量城市信息
  * @Author: Chenwx
  * @Date: 2020/6/9 11:25
  */
@@ -44,7 +45,7 @@ public class Destination implements Serializable {
     private String CountryEnName;
     private String ContinentID;
     private String ContinentEnName;
-    private List<Coordinates> Coordinates = new ArrayList<Coordinates>();
+    private List<Coordinates> Coordinates = new ArrayList<>();
     private String ContinentName;
 
     public String getId() {
