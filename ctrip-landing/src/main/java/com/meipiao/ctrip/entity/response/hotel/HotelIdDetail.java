@@ -1,6 +1,8 @@
-package com.meipiao.ctrip.entity.response;
+package com.meipiao.ctrip.entity.response.hotel;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.io.Serializable;
 
 /**
  * 酒店清单
@@ -9,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @Date: 2020/6/10 15:03
  */
 @Document(collection = "HotelIdDetail")
-public class HotelIdDetail {
+public class HotelIdDetail implements Serializable {
     @org.springframework.data.annotation.Id
     private String Id;
     private String CityID;

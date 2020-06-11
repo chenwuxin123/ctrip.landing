@@ -4,7 +4,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.meipiao.ctrip.entity.response.Coordinates;
 import com.meipiao.ctrip.entity.response.Destination;
-import com.meipiao.ctrip.entity.response.HotelIdDetail;
+import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
+import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +20,10 @@ public class ResponseToBeanUtil {
     public static void main(String[] args) {
 
         //全量城市信息
-        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-10T09:45:11.164+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"PagingInfo\":{\"LastRecordID\":\"1A1000003292\"},\"CityInfos\":{\"CityInfo\":[{\"Coordinates\":[{\"Provider\":\"BD\",\"LNG\":116.4137840210,\"LAT\":39.9105329229}],\"CityID\":\"1\",\"CityName\":\"北京\",\"CityEnName\":\"Beijing\",\"ParentCityID\":\"\",\"ParentCityName\":\"\",\"ParentCityEnName\":\"\",\"ProvinceID\":\"1\",\"ProvinceName\":\"北京\",\"ProvinceEnName\":\"Beijing\",\"CountryID\":\"1\",\"CountryName\":\"中国\",\"CountryEnName\":\"China\",\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"ContinentEnName\":\"Asia\"},{\"Coordinates\":[{\"Provider\":\"BD\",\"LNG\":121.4802384079,\"LAT\":31.2363508011}],\"CityID\":\"2\",\"CityName\":\"上海\",\"CityEnName\":\"Shanghai\",\"ParentCityID\":\"\",\"ParentCityName\":\"\",\"ParentCityEnName\":\"\",\"ProvinceID\":\"2\",\"ProvinceName\":\"上海\",\"ProvinceEnName\":\"Shanghai\",\"CountryID\":\"1\",\"CountryName\":\"中国\",\"CountryEnName\":\"China\",\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"ContinentEnName\":\"Asia\"}]}}\n";
-        ArrayList<Destination> destinationEntity = getDestinationEntity(result);
-        for (Destination destination1 : destinationEntity) {
-            System.err.println(destination1);
-        }
+        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-11T09:17:22.720+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"HotelStaticInfo\":{\"GeoInfo\":{\"City\":{\"Code\":\"1\",\"Name\":\"北京\"},\"Area\":{\"Code\":\"94\",\"Name\":\"朝阳区\"},\"PostalCode\":\"\",\"Address\":\"百子湾西里104号2楼\",\"BusinessDistrict\":[{\"Code\":\"767\",\"Name\":\"国贸地区\"}],\"Coordinates\":[{\"Provider\":\"Baidu\",\"LNG\":116.50947003046,\"LAT\":39.90663946452},{\"Provider\":\"Google\",\"LNG\":116.503046,\"LAT\":39.900419},{\"Provider\":\"AutoNavi\",\"LNG\":116.503046,\"LAT\":39.900419}],\"Province\":{\"Code\":\"1\",\"Name\":\"北京\"},\"Country\":{\"Code\":\"1\",\"Name\":\"中国\"}},\"ContactInfo\":{\"Telephone\":\"010-87725022\",\"Fax\":\"010-87725022\"},\"HotelTags\":[{\"Code\":\"ReservedData\",\"Name\":\"HotelNameEN\",\"Value\":\"Pin'ai Theme Hotel\"},{\"Code\":\"ReservedData\",\"Name\":\"HotelAddressEN\",\"Value\":\"Baiziwan (West Lane)\"}],\"ApplicabilityInfo\":{\"HotelApplicability\":\"3\"},\"HotelID\":4998653,\"HotelName\":\"北京品爱精品酒店\",\"StarRating\":2,\"IsOfficialRating\":false,\"OpenYear\":\"2016-12-01\",\"RenovationYear\":\"2017-04-01\",\"RoomQuantity\":32,\"IsOnlineSignUp\":true},\"LogInfo\":{\"LogID\":\"3862620825121468936\"}}\n";
+        HotelDetail hotelIdDetailBean = getHotelIdDetailBean(result);
+        System.out.println(hotelIdDetailBean.toString());
+
     }
 
     public static String getResponseStatus(String result) {
@@ -44,7 +44,7 @@ public class ResponseToBeanUtil {
     }
 
     //全量城市
-    public static ArrayList<Destination> getDestinationEntity(String result) {
+    public static ArrayList<Destination> getDestinationBean(String result) {
         JSONObject obj = JSONObject.parseObject(result);
         ArrayList<Destination> destinationList = new ArrayList<>();
 
@@ -92,7 +92,7 @@ public class ResponseToBeanUtil {
     }
 
     //城市酒店清单
-    public static ArrayList<HotelIdDetail> getHotelIdDetail(String result,JSONObject cityObj) {
+    public static ArrayList<HotelIdDetail> getHotelIdDetailBean(String result, JSONObject cityObj) {
         JSONObject jsonBean = JSONObject.parseObject(result);
         ArrayList<HotelIdDetail> hotelIdDetailList = new ArrayList<>();
         List<String> hotelIDs = (List) jsonBean.get("HotelIDs");
@@ -107,5 +107,75 @@ public class ResponseToBeanUtil {
             hotelIdDetailList.add(hotelBean);
         }
         return hotelIdDetailList;
+    }
+
+    //酒店静态信息
+    public static HotelDetail getHotelIdDetailBean(String result) {
+        JSONObject hotelStaticInfo = JSONObject.parseObject(result).getJSONObject("HotelStaticInfo");
+        String hotelNameEN = "";
+        String hotelAddressEN = "";
+        String masterHotelNum = hotelStaticInfo.getString("HotelID");
+        String hotelName = hotelStaticInfo.getString("HotelName");
+        JSONArray hotelTags = hotelStaticInfo.getJSONArray("HotelTags");
+        //酒店和地址英文名称
+        for (Object hotelTag : hotelTags) {
+            JSONObject hotelTagsJson = JSONObject.parseObject(hotelTag.toString());
+            if ("HotelNameEN".equals(hotelTagsJson.getString("Name"))) {
+                //new 对象 到时候直接set
+                hotelNameEN = hotelTagsJson.getString("Value");
+            } else if ("HotelAddressEN".equals(hotelTagsJson.getString("Name"))) {
+                hotelAddressEN = hotelTagsJson.getString("Value");
+            }
+        }
+        Integer starRating = hotelStaticInfo.getInteger("StarRating"); //星级
+        Boolean isOfficialRating = hotelStaticInfo.getBoolean("IsOfficialRating");//标明星级是否有政府机构评定
+        String openYear = hotelStaticInfo.getString("OpenYear");
+        Integer roomQuantity = hotelStaticInfo.getInteger("RoomQuantity");//酒店的客房数量
+        String telephone = hotelStaticInfo.getJSONObject("ContactInfo").getString("Telephone");//电话
+        String fax = hotelStaticInfo.getJSONObject("ContactInfo").getString("Fax");//传真
+        //GeoInfo
+        JSONObject geoInfo = hotelStaticInfo.getJSONObject("GeoInfo");
+        String address = geoInfo.getString("Address");//地址
+        String postalCode = geoInfo.getString("PostalCode");//酒店所在的城市区域代码
+        String country = geoInfo.getJSONObject("Country").getString("Name");//国家
+        String province = geoInfo.getJSONObject("Province").getString("Name");//省份
+        String city = geoInfo.getJSONObject("City").getString("Name");//城市
+
+        ArrayList<Coordinates> coordinatesWays = new ArrayList<>();
+        JSONArray coordinates = geoInfo.getJSONArray("Coordinates");
+        for (Object coordinate : coordinates) {
+            Coordinates cds = new Coordinates();
+            String provider = JSONObject.parseObject(coordinate.toString()).getString("Provider");//经纬度提供者
+            String lng = JSONObject.parseObject(coordinate.toString()).getString("LNG");//经纬
+            String lat = JSONObject.parseObject(coordinate.toString()).getString("LAT");//经纬
+            cds.setProvider(provider);
+            cds.setLNG(lng);
+            cds.setLAT(lat);
+            coordinatesWays.add(cds);
+        }
+
+        HotelDetail hotelDetailBean = new HotelDetail();
+        //set
+        hotelDetailBean.setUpdateTimeStamp(System.currentTimeMillis());
+        hotelDetailBean.setMasterHotelNum(masterHotelNum);
+        hotelDetailBean.setDataFlag(1);
+        hotelDetailBean.setHotelName(hotelName);
+        if (!"".equals(hotelNameEN)) {
+            hotelDetailBean.setHotelNameEn(hotelNameEN);
+        }
+        if (!"".equals(hotelAddressEN)) {
+            hotelDetailBean.setAddressEn(hotelAddressEN);
+        }
+        hotelDetailBean.setStarRating(starRating);
+        hotelDetailBean.setIsOfficialRating(isOfficialRating);
+        hotelDetailBean.setOpenYear(openYear);
+        hotelDetailBean.setRoomQuantity(roomQuantity);
+        hotelDetailBean.setAddress(address);
+        hotelDetailBean.setCoordinates(coordinatesWays);
+        hotelDetailBean.setCountryName(country);
+        hotelDetailBean.setProvinceName(province);
+        hotelDetailBean.setCityName(city);
+        hotelDetailBean.setPostalCode(postalCode);
+        return  hotelDetailBean;
     }
 }
