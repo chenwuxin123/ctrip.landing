@@ -2,6 +2,7 @@ package com.meipiao.ctrip.entity.response.room;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -9,6 +10,6 @@ import java.util.List;
  * @Date: 2020/6/11 14:20
  */
 @Data
-public class TimeLimitInfo {
+public class TimeLimitInfo implements Serializable {
     private List<DateRestriction> DateRestrictions;
 }

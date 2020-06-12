@@ -7,6 +7,7 @@ import com.meipiao.ctrip.controller.auth.AuthorityController;
 import com.meipiao.ctrip.entity.response.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
+import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
 import com.meipiao.ctrip.utils.HttpClientUtil;
 import com.meipiao.ctrip.utils.MongoAggregationUtil;
 import com.meipiao.ctrip.utils.RedisUtil;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @RestController
 @Slf4j
+@SuppressWarnings("unchecked")
 @RequestMapping("/api")
 @Api(value = "Ctrip Data Landing API", tags = {"携程数据落地API"})
 public class StaticDataController {
@@ -65,15 +68,8 @@ public class StaticDataController {
     @Value("${ROOM.INFO.ICODE}")
     private String roomInfoICODE;   //获取房型静态信息ICODE
 
-    @Value("${HOTEL.REVIEWS.ICODE}")
-    private String hotelReviewsICODE;   //查询酒店点评信息ICODE
-
-    @Value("${HOTEL.COMMENT.ICODE}")
-    private String hotelCommentICODE;   //查询酒店维度总点评数据ICODE
-
-    @Value("${HOTEL.DELETE.ICODE}")
-    private String hotelDeleteICODE;   //查询删除的酒店点评ICODE
-
+    @Value("${RATE.DIRECT}")
+    private String rateDirect;   //报价实时查询接口（国内酒店+海外酒店)
 
     @Value("${ctrip.http.address}")
     private String httpAddress;     //携程请求地址
@@ -87,12 +83,11 @@ public class StaticDataController {
     @Value("${UniqueID}")          //UniqueID
     private String UniqueID;
 
-    private ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
-
     private final String tokenKey = TokenConstant.TOKENKEY; //有效token对应的key
 
 
     private Map putParam() {
+        ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
         map.put("AID", aid);
         map.put("SID", sid);
         map.put("UUID", UniqueID);
@@ -144,19 +139,19 @@ public class StaticDataController {
           LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
     public R City() throws InterruptedException {
+        //获取sid aid uuid 请求的ICODE lock的UUID
+        int PageSize = 5000;
+        Map map = putParam();
+        map.put("ICODE", cityICODE);
+        String UUID = java.util.UUID.randomUUID().toString();
         String LastRecordID = "";
         do {
             String SearchType = "1";
             String IsHaveHotel = "F";
-            Integer PageSize = 5000;
-            //获取sid aid uuid
-            Map storeMap = putParam();
-            //请求的ICODE
-            storeMap.put("ICODE", cityICODE);
+
             //获得Access Token
-            String UUID = java.util.UUID.randomUUID().toString();
             String accessToken = getAccessToken(UUID);
-            this.map.put("Token", accessToken);
+            map.put("Token", accessToken);
             String json = "{\n" +
                     "    \"SearchCandidate\":{\n" +
                     "        \"SearchByType\":{\n" +
@@ -171,7 +166,7 @@ public class StaticDataController {
                     "}";
             log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
-            String result = HttpClientUtil.doPostJson(serverHost, this.map, json);
+            String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
                 log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
@@ -198,7 +193,11 @@ public class StaticDataController {
             获取mongodb中所有CityID 进行遍历查询HotelId
         */
         //查找城市id
-        Integer PageSize = 5000;
+        int PageSize = 5000;
+        //获取sid aid uuid 请求的ICODE lock的UUID
+        Map map = putParam();
+        map.put("ICODE", hotelidICODE);
+        String UUID = java.util.UUID.randomUUID().toString();
         Aggregation aggregation = mongoAggregationUtil.findAllByColumn("CityID", "CityName", "ProvinceID", "ProvinceName");
         AggregationResults<BasicDBObject> cityInfo = mongoTemplate.aggregate(aggregation, "Destination", BasicDBObject.class);
         for (BasicDBObject basicDBObject : cityInfo) {
@@ -209,14 +208,9 @@ public class StaticDataController {
             //执行业务
             String LastRecordID = "";
             do {
-                //获取sid aid uuid
-                Map storeMap = putParam();
-                //请求的ICODE
-                storeMap.put("ICODE", hotelidICODE);
                 //获取Access Token
-                String UUID = java.util.UUID.randomUUID().toString();
                 String accessToken = getAccessToken(UUID);
-                this.map.put("Token", accessToken);
+                map.put("Token", accessToken);
                 String json = "{\n" +
                         "    \"SearchCandidate\": {\n" +
                         "        \"SearchByCityID\": {\n" +
@@ -249,20 +243,20 @@ public class StaticDataController {
     @GetMapping("/hotel/static")
     @Async
     public R getHotelStatic() throws InterruptedException {
+        //获取sid aid uuid 请求的ICODE lock的UUID
+        Map map = putParam();
+        map.put("ICODE", hotelInfoICODE);
+        String UUID = java.util.UUID.randomUUID().toString();
         //查找酒店id
         Aggregation aggregation = mongoAggregationUtil.findAllByColumn("HotelId");
         AggregationResults<BasicDBObject> hotelIdDetail = mongoTemplate.aggregate(aggregation, "HotelIdDetail", BasicDBObject.class);
         for (BasicDBObject basicDBObject : hotelIdDetail) {
             JSONObject obj = JSONObject.parseObject(basicDBObject.toJson());
             String HotelID = obj.getString("HotelId");
-            //获取sid aid uuid
-            Map storeMap = putParam();
-            //请求的ICODE
-            storeMap.put("ICODE", hotelInfoICODE);
             //获得Access Token
-            String UUID = java.util.UUID.randomUUID().toString();
+
             String accessToken = getAccessToken(UUID);
-            this.map.put("Token", accessToken);
+            map.put("Token", accessToken);
 
             String json = "{\n" +
                     "    \"SearchCandidate\":{\n" +
@@ -298,75 +292,102 @@ public class StaticDataController {
     @Async
     public R getRoomStatic() throws InterruptedException {
 
-        String LastRecordID = "";
-        String HotelID = "23918626";
-        Integer PageSize = 1000;
-        //获取sid aid uuid
-        Map storeMap = putParam();
-        //请求的ICODE
-        storeMap.put("ICODE", roomInfoICODE);
-        //获得Access Token
+        int PageSize = 1000;
+        //获取sid aid uuid 请求的ICODE lock的UUID
+        Map map = putParam();
+        map.put("ICODE", roomInfoICODE);
         String UUID = java.util.UUID.randomUUID().toString();
+        //查找酒店id
+        Aggregation aggregation = mongoAggregationUtil.findAllByColumn("HotelId");
+        AggregationResults<BasicDBObject> hotelIds = mongoTemplate.aggregate(aggregation, "HotelIdDetail", BasicDBObject.class);
+
+        for (BasicDBObject basicDBObject : hotelIds) {
+            String hotelIdJson = basicDBObject.toJson();
+            //hotelIdObj是物理房间的id
+            JSONObject hotelIdObj = JSONObject.parseObject(hotelIdJson);
+            String HotelID = hotelIdObj.getString("HotelId");
+            String LastRecordID = "";
+            //执行业务
+            do {
+                //获得Access Token
+                String accessToken = getAccessToken(UUID);
+                map.put("Token", accessToken);
+                String json = "{\n" +
+                        "    \"SearchCandidate\":{\n" +
+                        "        \"HotelID\":\"" + HotelID + "\",\n" +
+                        "        \"RoomIDs\":[]\n" +
+                        "    },\n" +
+                        "    \"Settings\":{\n" +
+                        "        \"PrimaryLangID\":\"zh-cn\",\n" +
+                        "        \"ExtendedNodes\":[ \n" +
+                        "            \"RoomTypeInfo.Facilities\",\n" +
+                        "            \"RoomTypeInfo.Pictures\",\n" +
+                        "            \"RoomTypeInfo.Descriptions\",\n" +
+                        "            \"RoomTypeInfo.ChildLimit\",\n" +
+                        "            \"RoomTypeInfo.BroadNet\",\n" +
+                        "            \"RoomTypeInfo.RoomBedInfos\",\n" +
+                        "            \"RoomInfo.ApplicabilityInfo\",\n" +
+                        "            \"RoomInfo.RoomFGToPPInfo\",\n" +
+                        "            \"RoomInfo.ChannelLimit\",\n" +
+                        "            \"RoomInfo.RoomTags\",\n" +
+                        "            \"RoomInfo.AreaApplicabilityInfo\",\n" +
+                        "            \"RoomInfo.BookingRules\",\n" +
+                        "            \"RoomInfo.Smoking\",\n" +
+                        "            \"RoomInfo.IsNeedCustomerTelephone\",\n" +
+                        "            \"RoomTypeInfo.Pictures\",\n" +
+                        "            \"RoomTypeInfo.BroadNet\",\n" +
+                        "            \"RoomTypeInfo.Smoking\",\n" +
+                        "            \"RoomInfo.BroadNet\",\n" +
+                        "            \"RoomInfo.ExpressCheckout\",\n" +
+                        "            \"RoomInfo.RoomGiftInfos\",\n" +
+                        "            \"RoomInfo.RoomPromotions\",\n" +
+                        "            \"RoomInfo.HotelPromotions\",\n" +
+                        "            \"RoomInfo.MaskCampaignInfos\",\n" +
+                        "            \"RoomInfo.RoomTags.HotelDiscount\"\n" +
+                        "],\n" +
+                        "            \"SearchTags\": [{\n" +
+                        "            \"Code\": \"IsOutputHiddenMaskRoom\"\n" +
+                        "        }, {\n" +
+                        "            \"Code\": \"IsOutputLimitDestinationRoom\"\n" +
+                        "        }]\n" +
+                        "    },\n" +
+                        "    \"PagingSettings\":{      \n" +
+                        "        \"PageSize\":" + PageSize + ",\n" +
+                        "       \"LastRecordID\":\"" + LastRecordID + "\"\n" +
+                        "    }\n" +
+                        "}";
+                log.info("请求的json:{}", json);
+                String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+                String result = HttpClientUtil.doPostJson(serverHost, map, json);
+                String ack = ResponseToBeanUtil.getResponseStatus(result);
+                if (!"Success".equals(ack)) {
+                    log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                    return R.fail();
+                }
+                //获取实体集合，添加至mongodb
+                List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, HotelID);
+                mongoTemplate.insert(subRoomStaticBean, "SubRoomDetail");
+                LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
+            } while (!"".equals(LastRecordID));
+        }
+        return R.ok();
+    }
+
+    @ApiOperation(value = "直连查询")
+    @GetMapping("/query/rate")
+    @Async
+    public void queryRate() throws InterruptedException {
+        int PageSize = 1;
+        Map map = putParam();
+        map.put("ICODE", rateDirect);
+        String UUID = java.util.UUID.randomUUID().toString();
+        //获得Access Token
         String accessToken = getAccessToken(UUID);
-        this.map.put("Token", accessToken);
-
-        String json = "{\n" +
-                "    \"SearchCandidate\":{\n" +
-                "        \"HotelID\":23918626,\n" +
-                "        \"RoomIDs\":[]\n" +
-                "    },\n" +
-                "    \"Settings\":{\n" +
-                "        \"PrimaryLangID\":\"zh-cn\",\n" +
-                "        \"ExtendedNodes\":[ \n" +
-                "            \"RoomTypeInfo.Facilities\",\n" +
-                "            \"RoomTypeInfo.Pictures\",\n" +
-                "            \"RoomTypeInfo.Descriptions\",\n" +
-                "            \"RoomTypeInfo.ChildLimit\",\n" +
-                "            \"RoomTypeInfo.BroadNet\",\n" +
-                "            \"RoomTypeInfo.RoomBedInfos\",\n" +
-                "            \"RoomInfo.ApplicabilityInfo\",\n" +
-                "            \"RoomInfo.RoomFGToPPInfo\",\n" +
-                "            \"RoomInfo.ChannelLimit\",\n" +
-                "            \"RoomInfo.RoomTags\",\n" +
-                "            \"RoomInfo.AreaApplicabilityInfo\",\n" +
-                "            \"RoomInfo.BookingRules\",\n" +
-                "            \"RoomInfo.Smoking\",\n" +
-                "            \"RoomInfo.IsNeedCustomerTelephone\",\n" +
-                "            \"RoomTypeInfo.Pictures\",\n" +
-                "            \"RoomTypeInfo.BroadNet\",\n" +
-                "            \"RoomTypeInfo.Smoking\",\n" +
-                "            \"RoomInfo.BroadNet\",\n" +
-                "            \"RoomInfo.ExpressCheckout\",\n" +
-                "            \"RoomInfo.RoomGiftInfos\",\n" +
-                "            \"RoomInfo.RoomPromotions\",\n" +
-                "            \"RoomInfo.HotelPromotions\",\n" +
-                "            \"RoomInfo.MaskCampaignInfos\",\n" +
-                "            \"RoomInfo.RoomTags.HotelDiscount\"\n" +
-                "],\n" +
-                "            \"SearchTags\": [{\n" +
-                "            \"Code\": \"IsOutputHiddenMaskRoom\"\n" +
-                "        }, {\n" +
-                "            \"Code\": \"IsOutputLimitDestinationRoom\"\n" +
-                "        }]\n" +
-                "    },\n" +
-                "    \"PagingSettings\":{      \n" +
-                "        \"PageSize\":1000,\n" +
-                "        \"LastRecordID\":\"\"\n" +
-                "    }\n" +
-                "}";
-
+        map.put("Token", accessToken);
+        String json = "";
         log.info("请求的json:{}", json);
         String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
         String result = HttpClientUtil.doPostJson(serverHost, map, json);
-        String ack = ResponseToBeanUtil.getResponseStatus(result);
-        if (!"Success".equals(ack)) {
-            log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
-            return R.fail();
-        }
-        //获取实体集合，添加至mongodb
-        System.err.println(result);
-
-        return R.ok();
-}
-
+        System.out.println(result);
+    }
 }

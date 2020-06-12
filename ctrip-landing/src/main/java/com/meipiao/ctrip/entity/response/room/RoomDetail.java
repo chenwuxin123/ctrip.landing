@@ -3,6 +3,7 @@ package com.meipiao.ctrip.entity.response.room;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  */
 @Data
 @Document(collection = "RoomDetail")
-public class RoomDetail {
+public class RoomDetail implements Serializable {
     @org.springframework.data.annotation.Id
     private String Id;
     private long UpdateTimeStamp;

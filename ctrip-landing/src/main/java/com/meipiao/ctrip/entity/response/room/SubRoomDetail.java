@@ -3,6 +3,7 @@ package com.meipiao.ctrip.entity.response.room;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -11,7 +12,7 @@ import java.util.List;
  */
 @Data
 @Document(collection = "SubRoomDetail")
-public class SubRoomDetail {
+public class SubRoomDetail implements Serializable {
     @org.springframework.data.annotation.Id
     private String Id;
     private long UpdateTimeStamp;
@@ -148,7 +149,7 @@ public class SubRoomDetail {
     /// <para>1禁烟</para>
     /// <para>2吸烟</para>
     /// </summary>
-    private Integer IsAllowSmoking;
+    private String IsAllowSmoking;
 
     /// <summary>
     /// 日期限制
