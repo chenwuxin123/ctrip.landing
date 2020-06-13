@@ -49,7 +49,7 @@ public class PriceDetail implements Serializable {
     /// <summary>
     /// 可定房量，10间以内显示真实房量，大于10间显示 ”10+”
     /// </summary>
-    private Integer RemainingRooms;
+    private String RemainingRooms;
 
     /// <summary>
     /// 促销优惠金额

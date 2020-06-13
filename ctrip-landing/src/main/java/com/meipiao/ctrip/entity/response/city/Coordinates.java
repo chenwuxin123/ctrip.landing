@@ -1,4 +1,4 @@
-package com.meipiao.ctrip.entity.response;
+package com.meipiao.ctrip.entity.response.city;
 
 import lombok.Data;
 

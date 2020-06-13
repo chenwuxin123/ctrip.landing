@@ -1,5 +1,6 @@
-package com.meipiao.ctrip.entity.response;
+package com.meipiao.ctrip.entity.response.city;
 
+import com.meipiao.ctrip.entity.response.city.Coordinates;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
@@ -74,11 +75,11 @@ public class Destination implements Serializable {
 
     private long UpdateTimeStamp;
 
-    public List<com.meipiao.ctrip.entity.response.Coordinates> getCoordinates() {
+    public List<com.meipiao.ctrip.entity.response.city.Coordinates> getCoordinates() {
         return Coordinates;
     }
 
-    public void setCoordinates(List<com.meipiao.ctrip.entity.response.Coordinates> coordinates) {
+    public void setCoordinates(List<com.meipiao.ctrip.entity.response.city.Coordinates> coordinates) {
         Coordinates = coordinates;
     }
 

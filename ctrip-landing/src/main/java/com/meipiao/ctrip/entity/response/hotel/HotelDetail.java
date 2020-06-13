@@ -1,6 +1,6 @@
 package com.meipiao.ctrip.entity.response.hotel;
 
-import com.meipiao.ctrip.entity.response.Coordinates;
+import com.meipiao.ctrip.entity.response.city.Coordinates;
 import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 

@@ -1,12 +1,15 @@
 package com.meipiao.ctrip.utils;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.meipiao.ctrip.entity.response.Coordinates;
-import com.meipiao.ctrip.entity.response.Destination;
+import com.meipiao.ctrip.entity.response.city.Coordinates;
+import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
+import com.meipiao.ctrip.entity.response.rate.CancelDetail;
+import com.meipiao.ctrip.entity.response.rate.CancelEntity;
+import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
+import com.meipiao.ctrip.entity.response.rate.PriceDetail;
 import com.meipiao.ctrip.entity.response.room.DateRestriction;
 import com.meipiao.ctrip.entity.response.room.RoomDetail;
 import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
@@ -24,13 +27,13 @@ import java.util.List;
 public class ResponseToBeanUtil {
     public static void main(String[] args) {
 
-        //全量城市信息
-        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-11T13:50:09.889+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"RoomStaticInfos\":[{\"RoomTypeInfo\":{\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"ChildLimit\":{\"MaxOccupancy\":1,\"MaxAge\":0,\"MinAge\":0},\"Facilities\":[{\"FacilityItem\":[{\"ID\":\"180\",\"Name\":\"有线频道\",\"Status\":\"1\"}],\"CategoryName\":\"媒体科技\"},{\"FacilityItem\":[{\"ID\":\"183\",\"Name\":\"电视机\",\"Status\":\"1\"}],\"CategoryName\":\"媒体科技\"},{\"FacilityItem\":[{\"ID\":\"264\",\"Name\":\"客房WIFI\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"215\",\"Name\":\"220V电压插座\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"107\",\"Name\":\"空调\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"208\",\"Name\":\"衣柜/衣橱\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"79\",\"Name\":\"24小时热水\",\"Status\":\"1\"}],\"CategoryName\":\"浴室\"},{\"FacilityItem\":[{\"ID\":\"93\",\"Name\":\"吹风机\",\"Status\":\"1\"}],\"CategoryName\":\"浴室\"}],\"Pictures\":[{\"Type\":\"6\",\"Caption\":\"大床房\",\"URL\":\"http://dimg04.c-ctrip.com/images//200b1f000001gu1124C88_R_550_412.jpg\"},{\"Type\":\"6\",\"Caption\":\"大床房\",\"URL\":\"http://dimg04.c-ctrip.com/images//280h0w000000kg08n04D1_R_550_412.jpg\"}],\"Descriptions\":[],\"RoomBedInfos\":[{\"BedInfo\":[{\"ID\":\"4060\",\"Name\":\"大床\",\"NumberOfBeds\":\"1\",\"BedWidth\":\"1.6\"}],\"ID\":\"360\",\"Name\":\"大床\"}],\"RoomTypeTags\":[],\"RoomTypeID\":95383001,\"RoomTypeName\":\"大床房\",\"StandardRoomType\":\"标准间\",\"RoomQuantity\":6,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"BathRoomType\":\"Unknown\",\"ExtraBedCurrency\":\"RMB\"},\"RoomInfos\":[{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[1],\"Applicability\":\"00100000\",\"OtherDescription\":\"\"},\"AreaApplicabilityInfo\":{\"Details\":[{\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"RegionID\":\"1\",\"RegionName\":\"中国大陆\",\"IsApplicative\":1}]},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":true,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"12468154\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"F\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"0\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":227395015,\"RoomName\":\"大床房\",\"PayType\":\"PP\",\"RoomQuantity\":6,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":false,\"IsShowAgencyTag\":true,\"InvoiceType\":2,\"InvoiceMode\":\"1\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"IsNeedCustomerTelephone\":\"T\",\"ExtraBedCurrency\":\"RMB\"},{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[],\"Applicability\":\"10000000\",\"OtherDescription\":\"\"},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":true,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"16223055\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"F\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"0\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"},{\"Code\":\"Promotion\",\"Name\":\"HourlyRoom\",\"Value\":\"7\",\"Desc\":\"钟点房\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[{\"MinMaxType\":\"Min\",\"Time\":3,\"TimeUnit\":\"Hour\",\"MustBeMultiple\":false}],\"TimeLimitInfo\":[{\"DateRestrictions\":[{\"Scope\":\"Arrival\",\"DateType\":\"Time\",\"Start\":\"10:00\",\"End\":\"22:00\"}]}]}],\"Descriptions\":[{\"Text\":\"\",\"Category\":\"Promotion\"},{\"Text\":\"\",\"Category\":\"Promotion\"}],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":251209462,\"RoomName\":\"大床房(钟点房)\",\"PayType\":\"PP\",\"RoomQuantity\":6,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":true,\"IsFromAPI\":false,\"IsShowAgencyTag\":true,\"InvoiceType\":2,\"InvoiceMode\":\"1\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"IsNeedCustomerTelephone\":\"T\",\"ExtraBedCurrency\":\"RMB\"},{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[],\"Applicability\":\"10000000\",\"OtherDescription\":\"\"},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":true,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"17415932\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"F\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"0\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":843158409,\"RoomName\":\"大床房(促销一口价)\",\"PayType\":\"PP\",\"RoomQuantity\":6,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":false,\"IsShowAgencyTag\":true,\"InvoiceType\":2,\"InvoiceMode\":\"1\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"IsNeedCustomerTelephone\":\"T\",\"ExtraBedCurrency\":\"RMB\"},{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[1],\"Applicability\":\"00100000\",\"OtherDescription\":\"\"},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":false,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"3307929\"},{\"Code\":\"SupplierID\",\"Name\":\"SupplierID\",\"Value\":\"4768\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"T\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"332\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":505844482,\"RoomName\":\"大床房\",\"PayType\":\"PP\",\"RoomQuantity\":6,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":true,\"IsShowAgencyTag\":true,\"InvoiceType\":3,\"InvoiceMode\":\"0\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"ExtraBedCurrency\":\"RMB\"}]},{\"RoomTypeInfo\":{\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"ChildLimit\":{\"MaxOccupancy\":1,\"MaxAge\":0,\"MinAge\":0},\"Facilities\":[{\"FacilityItem\":[{\"ID\":\"180\",\"Name\":\"有线频道\",\"Status\":\"1\"}],\"CategoryName\":\"媒体科技\"},{\"FacilityItem\":[{\"ID\":\"183\",\"Name\":\"电视机\",\"Status\":\"1\"}],\"CategoryName\":\"媒体科技\"},{\"FacilityItem\":[{\"ID\":\"264\",\"Name\":\"客房WIFI\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"215\",\"Name\":\"220V电压插座\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"107\",\"Name\":\"空调\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"208\",\"Name\":\"衣柜/衣橱\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"79\",\"Name\":\"24小时热水\",\"Status\":\"1\"}],\"CategoryName\":\"浴室\"},{\"FacilityItem\":[{\"ID\":\"93\",\"Name\":\"吹风机\",\"Status\":\"1\"}],\"CategoryName\":\"浴室\"}],\"Pictures\":[{\"Type\":\"6\",\"Caption\":\"标准间\",\"URL\":\"http://dimg04.c-ctrip.com/images//200j1f000001gr5ll7FB1_R_550_412.jpg\"},{\"Type\":\"6\",\"Caption\":\"标准间\",\"URL\":\"http://dimg04.c-ctrip.com/images//28030w000000kg5wf23E7_R_550_412.jpg\"}],\"Descriptions\":[],\"RoomBedInfos\":[{\"BedInfo\":[{\"ID\":\"370\",\"Name\":\"单人床\",\"NumberOfBeds\":\"2\",\"BedWidth\":\"1.0\"}],\"ID\":\"361\",\"Name\":\"双床\"}],\"RoomTypeTags\":[],\"RoomTypeID\":95383002,\"RoomTypeName\":\"标准间\",\"StandardRoomType\":\"标准间\",\"RoomQuantity\":8,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"BathRoomType\":\"Unknown\",\"ExtraBedCurrency\":\"RMB\"},\"RoomInfos\":[{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[1],\"Applicability\":\"00100000\",\"OtherDescription\":\"\"},\"AreaApplicabilityInfo\":{\"Details\":[{\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"RegionID\":\"1\",\"RegionName\":\"中国大陆\",\"IsApplicative\":1}]},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":true,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"12468154\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"F\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"0\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":227394948,\"RoomName\":\"标准间\",\"PayType\":\"PP\",\"RoomQuantity\":8,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":false,\"IsShowAgencyTag\":true,\"InvoiceType\":2,\"InvoiceMode\":\"1\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"IsNeedCustomerTelephone\":\"T\",\"ExtraBedCurrency\":\"RMB\"},{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[1],\"Applicability\":\"00100000\",\"OtherDescription\":\"\"},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":false,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"1912389\"},{\"Code\":\"SupplierID\",\"Name\":\"SupplierID\",\"Value\":\"4768\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"T\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"332\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":505844477,\"RoomName\":\"标准间\",\"PayType\":\"PP\",\"RoomQuantity\":8,\"MaxOccupancy\":2,\"AreaRange\":\"12\",\"FloorRange\":\"1-2\",\"HasWindow\":\"1\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":true,\"IsShowAgencyTag\":true,\"InvoiceType\":3,\"InvoiceMode\":\"0\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"ExtraBedCurrency\":\"RMB\"}]},{\"RoomTypeInfo\":{\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"ChildLimit\":{\"MaxOccupancy\":1,\"MaxAge\":0,\"MinAge\":0},\"Facilities\":[{\"FacilityItem\":[{\"ID\":\"180\",\"Name\":\"有线频道\",\"Status\":\"1\"}],\"CategoryName\":\"媒体科技\"},{\"FacilityItem\":[{\"ID\":\"183\",\"Name\":\"电视机\",\"Status\":\"1\"}],\"CategoryName\":\"媒体科技\"},{\"FacilityItem\":[{\"ID\":\"264\",\"Name\":\"客房WIFI\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"215\",\"Name\":\"220V电压插座\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"107\",\"Name\":\"空调\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"208\",\"Name\":\"衣柜/衣橱\",\"Status\":\"1\"}],\"CategoryName\":\"便利设施\"},{\"FacilityItem\":[{\"ID\":\"79\",\"Name\":\"24小时热水\",\"Status\":\"1\"}],\"CategoryName\":\"浴室\"},{\"FacilityItem\":[{\"ID\":\"93\",\"Name\":\"吹风机\",\"Status\":\"1\"}],\"CategoryName\":\"浴室\"}],\"Pictures\":[{\"Type\":\"6\",\"Caption\":\"三人间\",\"URL\":\"http://dimg04.c-ctrip.com/images//20031f000001gtd8o5EE5_R_550_412.jpg\"},{\"Type\":\"6\",\"Caption\":\"三人间\",\"URL\":\"http://dimg04.c-ctrip.com/images//280f0w000000kege3CE4C_R_550_412.jpg\"}],\"Descriptions\":[],\"RoomBedInfos\":[{\"BedInfo\":[{\"ID\":\"370\",\"Name\":\"单人床\",\"NumberOfBeds\":\"3\",\"BedWidth\":\"1.0\"}],\"ID\":\"363\",\"Name\":\"多张床\"}],\"RoomTypeTags\":[],\"RoomTypeID\":95383003,\"RoomTypeName\":\"三人间\",\"StandardRoomType\":\"标准间\",\"RoomQuantity\":1,\"MaxOccupancy\":3,\"AreaRange\":\"15\",\"FloorRange\":\"2\",\"HasWindow\":\"2\",\"ExtraBedFee\":\"\",\"BathRoomType\":\"Unknown\",\"ExtraBedCurrency\":\"RMB\"},\"RoomInfos\":[{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[1],\"Applicability\":\"00100000\",\"OtherDescription\":\"\"},\"AreaApplicabilityInfo\":{\"Details\":[{\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"RegionID\":\"1\",\"RegionName\":\"中国大陆\",\"IsApplicative\":1}]},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":true,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"986794\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"F\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"0\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":225965361,\"RoomName\":\"三人间\",\"PayType\":\"PP\",\"RoomQuantity\":1,\"MaxOccupancy\":3,\"AreaRange\":\"15\",\"FloorRange\":\"2\",\"HasWindow\":\"2\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":false,\"IsShowAgencyTag\":true,\"InvoiceType\":2,\"InvoiceMode\":\"1\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"IsNeedCustomerTelephone\":\"T\",\"ExtraBedCurrency\":\"RMB\"},{\"ApplicabilityInfo\":{\"ApplicabilityIDs\":[1],\"Applicability\":\"00100000\",\"OtherDescription\":\"\"},\"Smoking\":{\"IsAllowSmoking\":\"2\"},\"BroadNet\":{\"HasBroadnet\":1,\"HasWirelessBroadnet\":\"T\",\"WirelessBroadnetRoom\":\"1\",\"WirelessBroadnetFee\":\"0\",\"HasWiredBroadnet\":\"F\",\"WiredBroadnetRoom\":\"1\",\"WiredBroadnetFee\":\"0\",\"BroadnetFeeDetail\":\"\",\"WirelessBroadnet\":2,\"WiredBroadnet\":0},\"RoomFGToPPInfo\":{\"CanFGToPP\":true},\"RoomGiftInfos\":[],\"ChannelLimit\":{\"IsApp\":true,\"IsWeb\":false,\"IsWeChat\":true},\"ExpressCheckout\":{\"IsSupported\":false},\"RoomTags\":[{\"Code\":\"RateCodeID\",\"Name\":\"RateCodeID\",\"Value\":\"12468419\"},{\"Code\":\"SupplierID\",\"Name\":\"SupplierID\",\"Value\":\"4768\"},{\"Code\":\"IsAgent\",\"Name\":\"IsAgent\",\"Value\":\"T\"},{\"Code\":\"VendorID\",\"Name\":\"VendorID\",\"Value\":\"332\"},{\"Code\":\"GenderType\",\"Name\":\"GenderType\",\"Value\":\"1\"}],\"BookingRules\":[{\"BookingOffsets\":[],\"LengthsOfStay\":[],\"TimeLimitInfo\":[]}],\"Descriptions\":[],\"RoomPromotions\":[],\"MaskCampaignInfos\":[],\"RoomID\":538606619,\"RoomName\":\"三人间\",\"PayType\":\"PP\",\"RoomQuantity\":1,\"MaxOccupancy\":3,\"AreaRange\":\"15\",\"FloorRange\":\"2\",\"HasWindow\":\"2\",\"ExtraBedFee\":\"\",\"IsHourlyRoom\":false,\"IsFromAPI\":true,\"IsShowAgencyTag\":true,\"InvoiceType\":3,\"InvoiceMode\":\"0\",\"IsSupportSpecialInvoice\":\"false\",\"ReceiveTextRemark\":false,\"ExtraBedCurrency\":\"RMB\"}]}],\"LogInfo\":{\"LogID\":\"5541515019028697904\"}}\n";
-        List<SubRoomDetail> subRoomStaticBean = getSubRoomStaticBean(result, "258136");
-        for (SubRoomDetail subRoomDetail : subRoomStaticBean) {
-            String string = JSON.toJSONString(subRoomDetail);
-            System.err.println(string);
+        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-12T16:40:42.948+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"PagingInfo\":{\"LastRecordID\":\"1A1000003292\"},\"CityInfos\":{\"CityInfo\":[{\"Coordinates\":[{\"Provider\":\"BD\",\"LNG\":116.4137840210,\"LAT\":39.9105329229}],\"CityID\":\"1\",\"CityName\":\"北京\",\"CityEnName\":\"Beijing\",\"ParentCityID\":\"\",\"ParentCityName\":\"\",\"ParentCityEnName\":\"\",\"ProvinceID\":\"1\",\"ProvinceName\":\"北京\",\"ProvinceEnName\":\"Beijing\",\"CountryID\":\"1\",\"CountryName\":\"中国\",\"CountryEnName\":\"China\",\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"ContinentEnName\":\"Asia\"},{\"Coordinates\":[{\"Provider\":\"BD\",\"LNG\":121.4802384079,\"LAT\":31.2363508011}],\"CityID\":\"2\",\"CityName\":\"上海\",\"CityEnName\":\"Shanghai\",\"ParentCityID\":\"\",\"ParentCityName\":\"\",\"ParentCityEnName\":\"\",\"ProvinceID\":\"2\",\"ProvinceName\":\"上海\",\"ProvinceEnName\":\"Shanghai\",\"CountryID\":\"1\",\"CountryName\":\"中国\",\"CountryEnName\":\"China\",\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"ContinentEnName\":\"Asia\"}]}}\n";
+
+        ArrayList<Destination> destinationBean = getDestinationBean(result);
+        for (Destination destination : destinationBean) {
+            System.out.println(destination.toString());
         }
+
     }
 
     public static String getResponseStatus(String result) {
@@ -341,5 +344,145 @@ public class ResponseToBeanUtil {
         return subList;
     }
 
+    //直连政策
+    public static List<PolicyDetail> getPolicyDetailBean(String result, String masterHotelNum) {
+        ArrayList<PolicyDetail> pdList = new ArrayList<>();
+        JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
+        for (Object roomPriceItem : roomPriceItems) {
+            JSONObject itemJson = JSONObject.parseObject(roomPriceItem.toString());
+            String roomId = itemJson.getString("RoomTypeID");//物理房型id
+            JSONArray roomPriceInfos = itemJson.getJSONArray("RoomPriceInfos");
+            for (Object roomPriceInfo : roomPriceInfos) {
+                JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
+                String roomCode = roomPriceJson.getString("RoomID");//子房型id
+                JSONArray priceInfos = roomPriceJson.getJSONArray("PriceInfos");
+
+                for (Object priceInfo : priceInfos) {
+                    JSONObject priceInfoJson = JSONObject.parseObject(priceInfo.toString());
+                    JSONArray dailyPrices = priceInfoJson.getJSONArray("DailyPrices");
+                    for (Object dailyPrice : dailyPrices) {
+                        JSONObject dailyPriceJson = JSONObject.parseObject(dailyPrice.toString());
+                        JSONObject mealInfo = JSONObject.parseObject(dailyPriceJson.getString("MealInfo"));
+                        Integer breakfast = mealInfo.getInteger("NumberOfBreakfast");
+                        Integer lunch = mealInfo.getInteger("NumberOfLunch");
+                        Integer dinner = mealInfo.getInteger("NumberOfDinner");
+                        PolicyDetail policyDetail = new PolicyDetail();
+                        policyDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                        policyDetail.setBreakfast(breakfast);//早
+                        policyDetail.setLunch(lunch);//中
+                        policyDetail.setDinner(dinner);//晚
+                        policyDetail.setMasterHotelNum(masterHotelNum);
+                        policyDetail.setRoomId(roomId);//物理房型id
+                        policyDetail.setRoomCode(roomCode);//子房型id
+                        policyDetail.setRatePlanId(MD5.getMD5(roomId + roomCode + breakfast));// 政策Id（md5-Key）RoomId+RoomCode+Breakfast
+                        pdList.add(policyDetail);
+                    }
+                }
+
+            }
+        }
+        return pdList;
+    }
+
+    //直连价格
+    public static List<PriceDetail> getPriceDetailBean(String result, String masterHotelNum, String useDay) {
+        ArrayList<PriceDetail> pdList = new ArrayList<>();
+        JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
+        //RoomPriceItems
+        for (Object roomPriceItem : roomPriceItems) {
+            JSONObject itemJson = JSONObject.parseObject(roomPriceItem.toString());
+            String roomId = itemJson.getString("RoomTypeID");//物理房型id
+            JSONArray roomPriceInfos = itemJson.getJSONArray("RoomPriceInfos");
+            //RoomPriceInfos
+            for (Object roomPriceInfo : roomPriceInfos) {
+                JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
+                String roomCode = roomPriceJson.getString("RoomID");//子房型id
+                JSONArray priceInfos = roomPriceJson.getJSONArray("PriceInfos");
+                //PriceInfos
+                for (Object priceInfo : priceInfos) {
+                    JSONObject priceInfoJson = JSONObject.parseObject(priceInfo.toString());
+                    String remainingRooms = priceInfoJson.getString("RemainingRooms");//可定房量
+                    JSONArray dailyPrices = priceInfoJson.getJSONArray("DailyPrices");
+                    //DailyPrices
+                    PriceDetail priceDetail = new PriceDetail();
+                    for (Object dailyPrice : dailyPrices) {
+                        JSONArray prices = JSONObject.parseObject(dailyPrice.toString()).getJSONArray("Prices");
+                        //Prices
+                        for (Object price : prices) {
+                            JSONObject priceJson = JSONObject.parseObject(price.toString());
+                            String type = priceJson.getString("Type");//卖价 or 结算价?
+                            String inclusiveAmount = priceJson.getString("InclusiveAmount");//税后价格
+                            if ("DisplayCostCurrency".equals(type)) {
+                                priceDetail.setDisplayCostCurrency(inclusiveAmount);
+                            } else if ("OriginalCostCurrency".equals(type)) {
+                                priceDetail.setOriginalCostCurrency(inclusiveAmount);
+                            } else if ("DisplayCurrency".equals(type)) {
+                                priceDetail.setDisplayCurrency(inclusiveAmount);
+                            } else if ("OriginalCurrency".equals(type)) {
+                                priceDetail.setOriginalCurrency(inclusiveAmount);
+                            }
+                            priceDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                            priceDetail.setUseDay(useDay);//请求的日期
+                            priceDetail.setMasterHotelNum(masterHotelNum);
+                            priceDetail.setRoomId(roomId);
+                            priceDetail.setRoomCode(roomCode);
+                            priceDetail.setRemainingRooms(remainingRooms);
+                        }
+                        pdList.add(priceDetail);
+                    }
+                }
+            }
+        }
+        return pdList;
+    }
+
+    //直连取消规则
+    public static List<CancelDetail> getCancelDetailBean(String result, String masterHotelNum, String useDay) {
+        ArrayList<CancelDetail> cancelList = new ArrayList<>();
+        JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
+        //RoomPriceItems
+        for (Object roomPriceItem : roomPriceItems) {
+            JSONObject itemJson = JSONObject.parseObject(roomPriceItem.toString());
+            String roomId = itemJson.getString("RoomTypeID");//物理房型id
+            JSONArray roomPriceInfos = itemJson.getJSONArray("RoomPriceInfos");
+            //RoomPriceInfos
+            for (Object roomPriceInfo : roomPriceInfos) {
+                JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
+                String roomCode = roomPriceJson.getString("RoomID");//子房型id
+                JSONArray cancelPolicyInfos = roomPriceJson.getJSONArray("CancelPolicyInfos");
+                //CancelPolicyInfos
+                for (Object cancelPolicyInfo : cancelPolicyInfos) {
+                    JSONObject cancelJson = JSONObject.parseObject(cancelPolicyInfo.toString());
+                    String start = cancelJson.getString("Start");
+                    String end = cancelJson.getString("End");
+                    JSONArray penaltyAmount = cancelJson.getJSONArray("PenaltyAmount");
+                    //PenaltyAmount
+                    ArrayList<CancelEntity> ceList = new ArrayList<>();
+                    for (Object penalty : penaltyAmount) {
+                        CancelEntity cancelEntity = new CancelEntity();
+                        JSONObject penaltyJson = JSONObject.parseObject(penalty.toString());
+                        String type = penaltyJson.getString("Type");
+                        String amount = penaltyJson.getString("Amount");
+                        String currency = penaltyJson.getString("Currency");
+                        cancelEntity.setType(type);
+                        cancelEntity.setAmount(amount);
+                        cancelEntity.setCurrency(currency);
+                        ceList.add(cancelEntity);
+                    }
+                    CancelDetail cancelDetail = new CancelDetail();
+                    cancelDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                    cancelDetail.setMasterHotelNum(masterHotelNum);
+                    cancelDetail.setRoomId(roomId);//物理房型id
+                    cancelDetail.setRoomCode(roomCode);//子房型id
+                    cancelDetail.setUseDay(useDay);//传参 哪天使用
+                    cancelDetail.setCancels(ceList);
+                    cancelDetail.setStart(start);
+                    cancelDetail.setEnd(end);
+                    cancelList.add(cancelDetail);
+                }
+            }
+        }
+        return cancelList;
+    }
 
 }

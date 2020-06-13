@@ -4,14 +4,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.meipiao.ctrip.common.R;
 import com.meipiao.ctrip.constant.TokenConstant;
 import com.meipiao.ctrip.controller.auth.AuthorityController;
-import com.meipiao.ctrip.entity.response.Destination;
+import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
+import com.meipiao.ctrip.entity.response.rate.CancelDetail;
+import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
+import com.meipiao.ctrip.entity.response.rate.PriceDetail;
+import com.meipiao.ctrip.entity.response.room.RoomDetail;
 import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
-import com.meipiao.ctrip.utils.HttpClientUtil;
-import com.meipiao.ctrip.utils.MongoAggregationUtil;
-import com.meipiao.ctrip.utils.RedisUtil;
-import com.meipiao.ctrip.utils.ResponseToBeanUtil;
+import com.meipiao.ctrip.utils.*;
 import com.mongodb.BasicDBObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -140,30 +141,17 @@ public class StaticDataController {
      */
     public R City() throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
-        int PageSize = 5000;
+        int PageSize = 2;
         Map map = putParam();
         map.put("ICODE", cityICODE);
         String UUID = java.util.UUID.randomUUID().toString();
         String LastRecordID = "";
-        do {
-            String SearchType = "1";
-            String IsHaveHotel = "F";
 
+        do {
             //获得Access Token
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
-            String json = "{\n" +
-                    "    \"SearchCandidate\":{\n" +
-                    "        \"SearchByType\":{\n" +
-                    "            \"SearchType\":\"" + SearchType + "\",\n" +
-                    "            \"IsHaveHotel\":\"" + IsHaveHotel + "\"\n" +
-                    "        }\n" +
-                    "    },\n" +
-                    "    \"PagingSettings\":{\n" +
-                    "        \"PageSize\":\"" + PageSize + "\",\n" +
-                    "        \"LastRecordID\":\"" + LastRecordID + "\"\n" +
-                    "    }\n" +
-                    "}";
+            String json = RequestBeanToJson.getCityEntityReq(PageSize, LastRecordID);
             log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
@@ -211,17 +199,7 @@ public class StaticDataController {
                 //获取Access Token
                 String accessToken = getAccessToken(UUID);
                 map.put("Token", accessToken);
-                String json = "{\n" +
-                        "    \"SearchCandidate\": {\n" +
-                        "        \"SearchByCityID\": {\n" +
-                        "            \"CityID\": \"" + cityID + "\"\n" +
-                        "        }\n" +
-                        "    },\n" +
-                        "    \"PagingSettings\": {\n" +
-                        "        \"PageSize\":\"" + PageSize + "\",\n" +
-                        "        \"LastRecordID\":\"" + LastRecordID + "\"\n" +
-                        "    }\n" +
-                        "}";
+                String json = RequestBeanToJson.getCityHotelIdReq(cityID, PageSize, LastRecordID);
                 log.info("请求的json:{}", json);
                 String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
@@ -257,21 +235,7 @@ public class StaticDataController {
 
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
-
-            String json = "{\n" +
-                    "    \"SearchCandidate\":{\n" +
-                    "        \"HotelID\":" + HotelID + "\n" +
-                    "    },\n" +
-                    "    \"Settings\":{\n" +
-                    "        \"PrimaryLangID\":\"zh-cn\",\n" +
-                    "        \"ExtendedNodes\":[\n" +
-                    "            \"HotelStaticInfo.GeoInfo\",\n" +
-                    "            \"HotelStaticInfo.ContactInfo\",\n" +
-                    "            \"HotelStaticInfo.HotelTags.ReservedData\"\n" +
-                    "        ]\n" +
-                    "    }\n" +
-                    "}";
-
+            String json = RequestBeanToJson.getHotelStaticReq(HotelID);
             log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
@@ -312,50 +276,7 @@ public class StaticDataController {
                 //获得Access Token
                 String accessToken = getAccessToken(UUID);
                 map.put("Token", accessToken);
-                String json = "{\n" +
-                        "    \"SearchCandidate\":{\n" +
-                        "        \"HotelID\":\"" + HotelID + "\",\n" +
-                        "        \"RoomIDs\":[]\n" +
-                        "    },\n" +
-                        "    \"Settings\":{\n" +
-                        "        \"PrimaryLangID\":\"zh-cn\",\n" +
-                        "        \"ExtendedNodes\":[ \n" +
-                        "            \"RoomTypeInfo.Facilities\",\n" +
-                        "            \"RoomTypeInfo.Pictures\",\n" +
-                        "            \"RoomTypeInfo.Descriptions\",\n" +
-                        "            \"RoomTypeInfo.ChildLimit\",\n" +
-                        "            \"RoomTypeInfo.BroadNet\",\n" +
-                        "            \"RoomTypeInfo.RoomBedInfos\",\n" +
-                        "            \"RoomInfo.ApplicabilityInfo\",\n" +
-                        "            \"RoomInfo.RoomFGToPPInfo\",\n" +
-                        "            \"RoomInfo.ChannelLimit\",\n" +
-                        "            \"RoomInfo.RoomTags\",\n" +
-                        "            \"RoomInfo.AreaApplicabilityInfo\",\n" +
-                        "            \"RoomInfo.BookingRules\",\n" +
-                        "            \"RoomInfo.Smoking\",\n" +
-                        "            \"RoomInfo.IsNeedCustomerTelephone\",\n" +
-                        "            \"RoomTypeInfo.Pictures\",\n" +
-                        "            \"RoomTypeInfo.BroadNet\",\n" +
-                        "            \"RoomTypeInfo.Smoking\",\n" +
-                        "            \"RoomInfo.BroadNet\",\n" +
-                        "            \"RoomInfo.ExpressCheckout\",\n" +
-                        "            \"RoomInfo.RoomGiftInfos\",\n" +
-                        "            \"RoomInfo.RoomPromotions\",\n" +
-                        "            \"RoomInfo.HotelPromotions\",\n" +
-                        "            \"RoomInfo.MaskCampaignInfos\",\n" +
-                        "            \"RoomInfo.RoomTags.HotelDiscount\"\n" +
-                        "],\n" +
-                        "            \"SearchTags\": [{\n" +
-                        "            \"Code\": \"IsOutputHiddenMaskRoom\"\n" +
-                        "        }, {\n" +
-                        "            \"Code\": \"IsOutputLimitDestinationRoom\"\n" +
-                        "        }]\n" +
-                        "    },\n" +
-                        "    \"PagingSettings\":{      \n" +
-                        "        \"PageSize\":" + PageSize + ",\n" +
-                        "       \"LastRecordID\":\"" + LastRecordID + "\"\n" +
-                        "    }\n" +
-                        "}";
+                String json = RequestBeanToJson.getRoomStaticReq(HotelID, PageSize, LastRecordID);
                 log.info("请求的json:{}", json);
                 String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
@@ -365,6 +286,8 @@ public class StaticDataController {
                     return R.fail();
                 }
                 //获取实体集合，添加至mongodb
+                List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, HotelID);
+                mongoTemplate.insert(roomStaticBean, "RoomDetail");
                 List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, HotelID);
                 mongoTemplate.insert(subRoomStaticBean, "SubRoomDetail");
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
@@ -376,18 +299,49 @@ public class StaticDataController {
     @ApiOperation(value = "直连查询")
     @GetMapping("/query/rate")
     @Async
-    public void queryRate() throws InterruptedException {
-        int PageSize = 1;
+    public R queryRate() throws InterruptedException {
+        int PageSize = 200;
         Map map = putParam();
         map.put("ICODE", rateDirect);
         String UUID = java.util.UUID.randomUUID().toString();
-        //获得Access Token
-        String accessToken = getAccessToken(UUID);
-        map.put("Token", accessToken);
-        String json = "";
-        log.info("请求的json:{}", json);
-        String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
-        String result = HttpClientUtil.doPostJson(serverHost, map, json);
-        System.out.println(result);
+        //查找酒店id
+        Aggregation aggregation = mongoAggregationUtil.findAllByColumn("HotelId");
+        AggregationResults<BasicDBObject> hotelIds = mongoTemplate.aggregate(aggregation, "HotelIdDetail", BasicDBObject.class);
+
+        for (BasicDBObject basicDBObject : hotelIds) {
+            String hotelIdJson = basicDBObject.toJson();
+            //hotelIdObj是物理房间的id
+            JSONObject hotelIdObj = JSONObject.parseObject(hotelIdJson);
+            String HotelID = hotelIdObj.getString("HotelId");
+            String LastRecordID = "";
+            do {
+                //获得Access Token
+                String accessToken = getAccessToken(UUID);
+                map.put("Token", accessToken);
+                //请求json
+                /**
+                 * start: 定义如何输入
+                 * end:   定义如何输入
+                 */
+                String json = RequestBeanToJson.getRateEntityReq(HotelID, LastRecordID, PageSize, "2020-09-09", "2020-09-09");
+                log.info("请求的json:{}", json);
+                String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+                String result = HttpClientUtil.doPostJson(serverHost, map, json);
+                String ack = ResponseToBeanUtil.getResponseStatus(result);
+                if (!"Success".equals(ack)) {
+                    log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                    return R.fail();
+                }
+                //添加至mongodb
+                List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, HotelID, "2016-05-5");
+                List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, HotelID);
+                List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, HotelID, "2016-05-5");
+                mongoTemplate.insert(priceDetailBean, "PriceDetail");
+                mongoTemplate.insert(policyDetailBean, "PolicyDetail");
+                mongoTemplate.insert(cancelDetailBean, "CancelDetail");
+                LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
+            } while (!"".equals(LastRecordID));
+        }
+        return R.ok();
     }
 }
