@@ -1,7 +1,6 @@
 package com.meipiao.ctrip.controller.api;
 
 import com.alibaba.fastjson.JSONObject;
-import com.meipiao.ctrip.common.R;
 import com.meipiao.ctrip.constant.TokenConstant;
 import com.meipiao.ctrip.controller.auth.AuthorityController;
 import com.meipiao.ctrip.entity.response.city.Destination;
@@ -139,7 +138,7 @@ public class StaticDataController {
           PageSize: 每页记录数，最大限制5000
           LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
-    public R City() throws InterruptedException {
+    public void City() throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
         int PageSize = 2;
         Map map = putParam();
@@ -158,14 +157,12 @@ public class StaticDataController {
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
                 log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
-                return R.fail();
             }
             //获取实体集合，添加至mongodb
             ArrayList<Destination> destinationEntity = ResponseToBeanUtil.getDestinationBean(result);
             mongoTemplate.insert(destinationEntity, "Destination");
             LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
         } while (!"".equals(LastRecordID));
-        return R.ok();
     }
 
     @ApiOperation(value = "获取酒店清单")
@@ -176,7 +173,7 @@ public class StaticDataController {
          PageSize: 每页记录数，最大限制5000
          LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
-    public R getHotelID() throws InterruptedException {
+    public void getHotelID() throws InterruptedException {
         /*
             获取mongodb中所有CityID 进行遍历查询HotelId
         */
@@ -206,7 +203,6 @@ public class StaticDataController {
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
                     log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
-                    return R.fail();
                 }
                 //获取实体集合，添加至mongodb
                 ArrayList<HotelIdDetail> hotelIdDetail = ResponseToBeanUtil.getHotelIdDetailBean(result, cityObj);
@@ -214,13 +210,12 @@ public class StaticDataController {
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
         }
-        return R.ok();
     }
 
     @ApiOperation(value = "获取酒店静态信息")
     @GetMapping("/hotel/static")
     @Async
-    public R getHotelStatic() throws InterruptedException {
+    public void getHotelStatic() throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", hotelInfoICODE);
@@ -242,19 +237,17 @@ public class StaticDataController {
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
                 log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
-                return R.fail();
             }
             //获取实体集合，添加至mongodb
             HotelDetail hotelIdDetailBean = ResponseToBeanUtil.getHotelIdDetailBean(result);
             mongoTemplate.insert(hotelIdDetailBean, "HotelDetail");
         }
-        return R.ok();
     }
 
     @ApiOperation(value = "获取房型静态信息")
     @GetMapping("/room/static")
     @Async
-    public R getRoomStatic() throws InterruptedException {
+    public void getRoomStatic() throws InterruptedException {
 
         int PageSize = 1000;
         //获取sid aid uuid 请求的ICODE lock的UUID
@@ -283,7 +276,6 @@ public class StaticDataController {
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
                     log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
-                    return R.fail();
                 }
                 //获取实体集合，添加至mongodb
                 List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, HotelID);
@@ -293,13 +285,12 @@ public class StaticDataController {
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
         }
-        return R.ok();
     }
 
     @ApiOperation(value = "直连查询")
     @GetMapping("/query/rate")
     @Async
-    public R queryRate() throws InterruptedException {
+    public void queryRate() throws InterruptedException {
         int PageSize = 200;
         Map map = putParam();
         map.put("ICODE", rateDirect);
@@ -330,7 +321,6 @@ public class StaticDataController {
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
                     log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
-                    return R.fail();
                 }
                 //添加至mongodb
                 List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, HotelID, "2016-05-5");
@@ -342,6 +332,5 @@ public class StaticDataController {
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
         }
-        return R.ok();
     }
 }
