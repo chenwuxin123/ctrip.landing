@@ -77,9 +77,8 @@ public class AsyncThreadController {
     @GetMapping("/async/static/room")
     @ApiOperation(value = "房型静态信息异步拉取")
     @ApiImplicitParam(value = "线程数" ,required = true)
-    public void asyncStaticRooM() {
+    public void asyncStaticRooM(int threadCount) {
 
-        int threadCount = 3;//线程数
         //创建线程池
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
         //查找酒店id
@@ -109,8 +108,8 @@ public class AsyncThreadController {
     @GetMapping("/async/rate")
     @ApiOperation(value = "报价实时查询接口异步拉取")
     @ApiImplicitParam(value = "线程数" ,required = true)
-    public void asyncRate() {
-        int threadCount = 3;//线程数
+    public void asyncRate(int threadCount) {
+
         //创建线程池
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
         //查找酒店id

@@ -147,7 +147,7 @@ public class StaticDataController {
      */
     public void City() throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
-        int PageSize = 2;
+        int PageSize = 5000;
         Map map = putParam();
         map.put("ICODE", cityICODE);
         String UUID = java.util.UUID.randomUUID().toString();
@@ -252,7 +252,7 @@ public class StaticDataController {
     @ApiOperation(value = "获取房型静态信息")
     public void getRoomStatic(List<String> hotelIds) throws InterruptedException {
 
-        int PageSize = 1000;
+        int PageSize = 1000; //分页每次请求售卖房型数量，最大限制1000
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", roomInfoICODE);
@@ -286,7 +286,7 @@ public class StaticDataController {
     @GetMapping("/query/rate")
     @ApiOperation(value = "直连查询")
     public void queryRate(List<String> hotelIds) throws InterruptedException {
-        int PageSize = 200;
+        int PageSize = 200;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
         Map map = putParam();
         map.put("ICODE", rateDirect);
         String UUID = java.util.UUID.randomUUID().toString();
