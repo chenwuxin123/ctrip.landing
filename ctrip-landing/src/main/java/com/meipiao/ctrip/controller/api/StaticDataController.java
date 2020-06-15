@@ -11,8 +11,10 @@ import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
 import com.meipiao.ctrip.entity.response.rate.PriceDetail;
 import com.meipiao.ctrip.entity.response.room.RoomDetail;
 import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
+import com.meipiao.ctrip.service.MongodbService;
 import com.meipiao.ctrip.utils.*;
 import com.mongodb.BasicDBObject;
+import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +60,9 @@ public class StaticDataController {
 
     @Autowired
     MongoAggregationUtil mongoAggregationUtil;
+
+    @Autowired
+    MongodbService mongodbService;
 
     @Value("${CITY.ICODE}")
     private String cityICODE;   //获取全量城市信息ICODE
@@ -129,9 +137,8 @@ public class StaticDataController {
         return access_token;
     }
 
-    @ApiOperation(value = "获取全量城市信息")
     @GetMapping("/city")
-    @Async
+    @ApiOperation(value = "获取全量城市信息")
     /*
           SearchByType:  搜索范围描述 1.中国(包含港澳台地区) 2.海外 3.全部
           IsHaveHotel: 是否输出有酒店的城市
@@ -145,7 +152,7 @@ public class StaticDataController {
         map.put("ICODE", cityICODE);
         String UUID = java.util.UUID.randomUUID().toString();
         String LastRecordID = "";
-
+        int updateCount = 0;
         do {
             //获得Access Token
             String accessToken = getAccessToken(UUID);
@@ -160,14 +167,14 @@ public class StaticDataController {
             }
             //获取实体集合，添加至mongodb
             ArrayList<Destination> destinationEntity = ResponseToBeanUtil.getDestinationBean(result);
-            mongoTemplate.insert(destinationEntity, "Destination");
+            updateCount += mongodbService.updateCity(destinationEntity);
             LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
         } while (!"".equals(LastRecordID));
+        log.info("此次请求全量城市信息共添加|更新了{}条数据", updateCount);
     }
 
-    @ApiOperation(value = "获取酒店清单")
     @GetMapping("/hotel/id")
-    @Async
+    @ApiOperation(value = "获取酒店清单")
     /*
          CityID: 城市ID
          PageSize: 每页记录数，最大限制5000
@@ -192,6 +199,7 @@ public class StaticDataController {
             String cityID = cityObj.getString("CityID");
             //执行业务
             String LastRecordID = "";
+            int updateCount = 0;
             do {
                 //获取Access Token
                 String accessToken = getAccessToken(UUID);
@@ -206,28 +214,23 @@ public class StaticDataController {
                 }
                 //获取实体集合，添加至mongodb
                 ArrayList<HotelIdDetail> hotelIdDetail = ResponseToBeanUtil.getHotelIdDetailBean(result, cityObj);
-                mongoTemplate.insert(hotelIdDetail, "HotelIdDetail");
+                updateCount += mongodbService.updateHotelId(hotelIdDetail);
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
+            log.info("此次请求全量城市信息共添加|更新了{}条数据", updateCount);
         }
     }
 
-    @ApiOperation(value = "获取酒店静态信息")
-    @GetMapping("/hotel/static")
     @Async
-    public void getHotelStatic() throws InterruptedException {
+    @GetMapping("/hotel/static")
+    @ApiOperation(value = "获取酒店静态信息")
+    public void getHotelStatic(List<String> hotelIds) throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", hotelInfoICODE);
         String UUID = java.util.UUID.randomUUID().toString();
-        //查找酒店id
-        Aggregation aggregation = mongoAggregationUtil.findAllByColumn("HotelId");
-        AggregationResults<BasicDBObject> hotelIdDetail = mongoTemplate.aggregate(aggregation, "HotelIdDetail", BasicDBObject.class);
-        for (BasicDBObject basicDBObject : hotelIdDetail) {
-            JSONObject obj = JSONObject.parseObject(basicDBObject.toJson());
-            String HotelID = obj.getString("HotelId");
+        for (String HotelID : hotelIds) {
             //获得Access Token
-
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
             String json = RequestBeanToJson.getHotelStaticReq(HotelID);
@@ -240,31 +243,23 @@ public class StaticDataController {
             }
             //获取实体集合，添加至mongodb
             HotelDetail hotelIdDetailBean = ResponseToBeanUtil.getHotelIdDetailBean(result);
-            mongoTemplate.insert(hotelIdDetailBean, "HotelDetail");
+            mongodbService.updateHotelStatic(hotelIdDetailBean);
         }
     }
 
-    @ApiOperation(value = "获取房型静态信息")
-    @GetMapping("/room/static")
     @Async
-    public void getRoomStatic() throws InterruptedException {
+    @GetMapping("/room/static")
+    @ApiOperation(value = "获取房型静态信息")
+    public void getRoomStatic(List<String> hotelIds) throws InterruptedException {
 
         int PageSize = 1000;
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", roomInfoICODE);
         String UUID = java.util.UUID.randomUUID().toString();
-        //查找酒店id
-        Aggregation aggregation = mongoAggregationUtil.findAllByColumn("HotelId");
-        AggregationResults<BasicDBObject> hotelIds = mongoTemplate.aggregate(aggregation, "HotelIdDetail", BasicDBObject.class);
 
-        for (BasicDBObject basicDBObject : hotelIds) {
-            String hotelIdJson = basicDBObject.toJson();
-            //hotelIdObj是物理房间的id
-            JSONObject hotelIdObj = JSONObject.parseObject(hotelIdJson);
-            String HotelID = hotelIdObj.getString("HotelId");
+        for (String HotelID : hotelIds) {
             String LastRecordID = "";
-            //执行业务
             do {
                 //获得Access Token
                 String accessToken = getAccessToken(UUID);
@@ -279,31 +274,24 @@ public class StaticDataController {
                 }
                 //获取实体集合，添加至mongodb
                 List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, HotelID);
-                mongoTemplate.insert(roomStaticBean, "RoomDetail");
+                mongodbService.updateRoomStatic(roomStaticBean);
                 List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, HotelID);
-                mongoTemplate.insert(subRoomStaticBean, "SubRoomDetail");
+                mongodbService.updateSubRoomStatic(subRoomStaticBean);
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
         }
     }
 
-    @ApiOperation(value = "直连查询")
-    @GetMapping("/query/rate")
     @Async
-    public void queryRate() throws InterruptedException {
+    @GetMapping("/query/rate")
+    @ApiOperation(value = "直连查询")
+    public void queryRate(List<String> hotelIds) throws InterruptedException {
         int PageSize = 200;
         Map map = putParam();
         map.put("ICODE", rateDirect);
         String UUID = java.util.UUID.randomUUID().toString();
-        //查找酒店id
-        Aggregation aggregation = mongoAggregationUtil.findAllByColumn("HotelId");
-        AggregationResults<BasicDBObject> hotelIds = mongoTemplate.aggregate(aggregation, "HotelIdDetail", BasicDBObject.class);
 
-        for (BasicDBObject basicDBObject : hotelIds) {
-            String hotelIdJson = basicDBObject.toJson();
-            //hotelIdObj是物理房间的id
-            JSONObject hotelIdObj = JSONObject.parseObject(hotelIdJson);
-            String HotelID = hotelIdObj.getString("HotelId");
+        for (String HotelID : hotelIds) {
             String LastRecordID = "";
             do {
                 //获得Access Token
@@ -326,9 +314,9 @@ public class StaticDataController {
                 List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, HotelID, "2016-05-5");
                 List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, HotelID);
                 List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, HotelID, "2016-05-5");
-                mongoTemplate.insert(priceDetailBean, "PriceDetail");
-                mongoTemplate.insert(policyDetailBean, "PolicyDetail");
-                mongoTemplate.insert(cancelDetailBean, "CancelDetail");
+                mongodbService.updatePriceDetail(priceDetailBean);
+                mongodbService.updatePolicyDetail(policyDetailBean);
+                mongodbService.updateCancelDetail(cancelDetailBean);
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
         }

@@ -96,12 +96,12 @@ public class SubRoomDetail implements Serializable {
     /// <summary>
     /// 房型是否直连
     /// </summary>
-    private boolean IsFromAPI;
+    private String IsFromAPI;
 
     /// <summary>
     /// 是否展示代理标签
     /// </summary>
-    private boolean IsShowAgencyTag;
+    private String IsShowAgencyTag;
 
     /// <summary>
     /// 开票方式
@@ -126,7 +126,7 @@ public class SubRoomDetail implements Serializable {
     /// <summary>
     /// 是否接受客人在订单填写自定义备注
     /// </summary>
-    private boolean ReceiveTextRemark;
+    private String ReceiveTextRemark;
 
     /// <summary>
     /// 酒店是否需要客人联系电话

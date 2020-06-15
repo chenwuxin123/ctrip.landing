@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * 全量城市信息
+ *
  * @Author: Chenwx
  * @Date: 2020/6/9 11:25
  */
@@ -48,6 +49,7 @@ public class Destination implements Serializable {
     private String ContinentEnName;
     private List<Coordinates> Coordinates = new ArrayList<>();
     private String ContinentName;
+    private long UpdateTimeStamp;
 
     public String getId() {
         return Id;
@@ -73,7 +75,6 @@ public class Destination implements Serializable {
         UpdateTimeStamp = updateTimeStamp;
     }
 
-    private long UpdateTimeStamp;
 
     public List<com.meipiao.ctrip.entity.response.city.Coordinates> getCoordinates() {
         return Coordinates;

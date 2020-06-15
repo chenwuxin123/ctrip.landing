@@ -137,6 +137,7 @@ public class ResponseToBeanUtil {
                 hotelAddressEN = hotelTagsJson.getString("Value");
             }
         }
+        String hotelApplicability = hotelStaticInfo.getJSONObject("ApplicabilityInfo").getString("HotelApplicability");//酒店是否有(3,仅接待大陆客人;4,仅接待大陆和港澳台客人;5,接待大陆、港澳台及外国客人)
         Integer starRating = hotelStaticInfo.getInteger("StarRating"); //星级
         Boolean isOfficialRating = hotelStaticInfo.getBoolean("IsOfficialRating");//标明星级是否有政府机构评定
         String openYear = hotelStaticInfo.getString("OpenYear");
@@ -168,7 +169,7 @@ public class ResponseToBeanUtil {
         //set
         hotelDetailBean.setUpdateTimeStamp(System.currentTimeMillis());
         hotelDetailBean.setMasterHotelNum(masterHotelNum);
-        hotelDetailBean.setDataFlag(1);
+        hotelDetailBean.setDataFlag("3".equals(hotelApplicability) ? 1 : 0);
         hotelDetailBean.setHotelName(hotelName);
         if (!"".equals(hotelNameEN)) {
             hotelDetailBean.setHotelNameEn(hotelNameEN);
@@ -177,7 +178,7 @@ public class ResponseToBeanUtil {
             hotelDetailBean.setAddressEn(hotelAddressEN);
         }
         hotelDetailBean.setStarRating(starRating);
-        hotelDetailBean.setIsOfficialRating(isOfficialRating);
+        hotelDetailBean.setIsOfficialRating(isOfficialRating ? 1 : 0);
         hotelDetailBean.setOpenYear(openYear);
         hotelDetailBean.setRoomQuantity(roomQuantity);
         hotelDetailBean.setAddress(address);
@@ -186,6 +187,8 @@ public class ResponseToBeanUtil {
         hotelDetailBean.setProvinceName(province);
         hotelDetailBean.setCityName(city);
         hotelDetailBean.setPostalCode(postalCode);
+        hotelDetailBean.setPhone(telephone);
+        hotelDetailBean.setFax(fax);
         return hotelDetailBean;
     }
 
@@ -258,12 +261,12 @@ public class ResponseToBeanUtil {
             //获取物理房型的id
             String roomTypeInfo = JSONObject.parseObject(roomStaticInfo.toString()).getString("RoomTypeInfo");
             JSONObject jsonRoomType = JSONObject.parseObject(roomTypeInfo);
-            String roomId = jsonRoomType.getString("RoomTypeID");
+            String roomId = jsonRoomType.getString("RoomTypeID");//物理房型ID
             //解析RoomInfos
             JSONArray roomInfos = JSONObject.parseObject(roomStaticInfo.toString()).getJSONArray("RoomInfos");
             for (Object roomInfo : roomInfos) {
                 JSONObject subRoomJson = JSONObject.parseObject(roomInfo.toString());
-                String subRoomId = subRoomJson.getString("RoomID");
+                String subRoomId = subRoomJson.getString("RoomID");//子房型id
                 String roomName = subRoomJson.getString("RoomName");
                 String payType = subRoomJson.getString("PayType");
                 Integer roomQuantity = subRoomJson.getInteger("RoomQuantity");
@@ -299,12 +302,12 @@ public class ResponseToBeanUtil {
                 subRoomDetail.setHasWindow(hasWindow);
                 subRoomDetail.setExtraBedFee(extraBedFee);
                 subRoomDetail.setIsHourlyRoom(isHourlyRoom ? "true" : "false");
-                subRoomDetail.setIsFromAPI(isFromAPI);
-                subRoomDetail.setIsShowAgencyTag(isShowAgencyTag);
+                subRoomDetail.setIsFromAPI(isFromAPI ? "true" : "false");
+                subRoomDetail.setIsShowAgencyTag(isShowAgencyTag ? "true" : "false");
                 subRoomDetail.setInvoiceType(invoiceType);
                 subRoomDetail.setInvoiceMode(invoiceMode);
                 subRoomDetail.setIsSupportSpecialInvoice(isSupportSpecialInvoice);
-                subRoomDetail.setReceiveTextRemark(receiveTextRemark);
+                subRoomDetail.setReceiveTextRemark(receiveTextRemark ? "true" : "false");
                 subRoomDetail.setIsNeedCustomerTelephone(isNeedCustomerTelephone);
                 subRoomDetail.setIsClosed(isClosed);
                 subRoomDetail.setIsAllowRepricing(isAllowRepricing);

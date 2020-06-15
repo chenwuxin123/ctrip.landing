@@ -26,7 +26,7 @@ public class HotelDetail implements Serializable {
     private String HotelNameEn;
     private String AddressEn;
     private Integer StarRating;
-    private boolean IsOfficialRating;
+    private Integer IsOfficialRating; //1:true 0:false
     private String OpenYear;
     private Integer RoomQuantity;
     private String Address;
