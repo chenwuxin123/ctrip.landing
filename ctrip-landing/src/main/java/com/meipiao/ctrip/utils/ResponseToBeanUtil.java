@@ -370,7 +370,7 @@ public class ResponseToBeanUtil {
                         Integer lunch = mealInfo.getInteger("NumberOfLunch");
                         Integer dinner = mealInfo.getInteger("NumberOfDinner");
                         PolicyDetail policyDetail = new PolicyDetail();
-                        policyDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                        policyDetail.setUpdateTimeStamp(System.currentTimeMillis()/1000);
                         policyDetail.setBreakfast(breakfast);//早
                         policyDetail.setLunch(lunch);//中
                         policyDetail.setDinner(dinner);//晚
@@ -424,7 +424,7 @@ public class ResponseToBeanUtil {
                             } else if ("OriginalCurrency".equals(type)) {
                                 priceDetail.setOriginalCurrency(inclusiveAmount);
                             }
-                            priceDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                            priceDetail.setUpdateTimeStamp(System.currentTimeMillis()/1000);
                             priceDetail.setUseDay(useDay);//请求的日期
                             priceDetail.setMasterHotelNum(masterHotelNum);
                             priceDetail.setRoomId(roomId);
@@ -473,7 +473,7 @@ public class ResponseToBeanUtil {
                         ceList.add(cancelEntity);
                     }
                     CancelDetail cancelDetail = new CancelDetail();
-                    cancelDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                    cancelDetail.setUpdateTimeStamp(System.currentTimeMillis()/1000);
                     cancelDetail.setMasterHotelNum(masterHotelNum);
                     cancelDetail.setRoomId(roomId);//物理房型id
                     cancelDetail.setRoomCode(roomCode);//子房型id

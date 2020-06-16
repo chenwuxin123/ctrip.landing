@@ -4,6 +4,7 @@ import com.meipiao.ctrip.controller.api.StaticDataController;
 import com.meipiao.ctrip.utils.MongoAggregationUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class AsyncThreadController {
 
     @GetMapping("/async/static/hotel")
     @ApiOperation(value = "酒店静态信息异步拉取")
-    @ApiImplicitParam(value = "线程数" ,required = true)
+    @ApiImplicitParam(value = "线程数", required = true)
     public void asyncStaticHotel(int threadCount) {
 
         //threadCount线程数
@@ -76,7 +77,7 @@ public class AsyncThreadController {
 
     @GetMapping("/async/static/room")
     @ApiOperation(value = "房型静态信息异步拉取")
-    @ApiImplicitParam(value = "线程数" ,required = true)
+    @ApiImplicitParam(value = "线程数", required = true)
     public void asyncStaticRooM(int threadCount) {
 
         //创建线程池
@@ -107,8 +108,12 @@ public class AsyncThreadController {
 
     @GetMapping("/async/rate")
     @ApiOperation(value = "报价实时查询接口异步拉取")
-    @ApiImplicitParam(value = "线程数" ,required = true)
-    public void asyncRate(int threadCount) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "threadCount", value = "线程数", required = true),
+            @ApiImplicitParam(name = "start", value = "入住日期", required = true),
+            @ApiImplicitParam(name = "end", value = "离店日期", required = true),
+    })
+    public void asyncRate(int threadCount, String start, String end) {
 
         //创建线程池
         ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
@@ -127,7 +132,7 @@ public class AsyncThreadController {
             executorService.execute(() -> {
                 try {
                     log.info("报价实时查询接口异步拉取开始执行...");
-                    staticDataController.queryRate(subList);
+                    staticDataController.queryRate(subList, start, end);
                 } catch (InterruptedException e) {
                     log.error(e.getMessage());
                 }

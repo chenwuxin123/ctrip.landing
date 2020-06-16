@@ -14,7 +14,6 @@ import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
 import com.meipiao.ctrip.service.MongodbService;
 import com.meipiao.ctrip.utils.*;
 import com.mongodb.BasicDBObject;
-import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +22,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -163,7 +159,8 @@ public class StaticDataController {
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                break;
             }
             //获取实体集合，添加至mongodb
             ArrayList<Destination> destinationEntity = ResponseToBeanUtil.getDestinationBean(result);
@@ -210,7 +207,8 @@ public class StaticDataController {
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
-                    log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                    log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                    break;
                 }
                 //获取实体集合，添加至mongodb
                 ArrayList<HotelIdDetail> hotelIdDetail = ResponseToBeanUtil.getHotelIdDetailBean(result, cityObj);
@@ -221,9 +219,12 @@ public class StaticDataController {
         }
     }
 
+    /*
+        @GetMapping("/hotel/static")
+        @ApiOperation(value = "获取酒店静态信息")
+
+     */
     @Async
-    @GetMapping("/hotel/static")
-    @ApiOperation(value = "获取酒店静态信息")
     public void getHotelStatic(List<String> hotelIds) throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
@@ -239,7 +240,8 @@ public class StaticDataController {
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                break;
             }
             //获取实体集合，添加至mongodb
             HotelDetail hotelIdDetailBean = ResponseToBeanUtil.getHotelIdDetailBean(result);
@@ -247,9 +249,12 @@ public class StaticDataController {
         }
     }
 
+    /*
+        @GetMapping("/room/static")
+        @ApiOperation(value = "获取房型静态信息")
+
+     */
     @Async
-    @GetMapping("/room/static")
-    @ApiOperation(value = "获取房型静态信息")
     public void getRoomStatic(List<String> hotelIds) throws InterruptedException {
 
         int PageSize = 1000; //分页每次请求售卖房型数量，最大限制1000
@@ -270,7 +275,8 @@ public class StaticDataController {
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
-                    log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                    log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                    break;
                 }
                 //获取实体集合，添加至mongodb
                 List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, HotelID);
@@ -282,10 +288,13 @@ public class StaticDataController {
         }
     }
 
+    /*
+        @GetMapping("/query/rate")
+        @ApiOperation(value = "直连查询")
+
+     */
     @Async
-    @GetMapping("/query/rate")
-    @ApiOperation(value = "直连查询")
-    public void queryRate(List<String> hotelIds) throws InterruptedException {
+    public void queryRate(List<String> hotelIds,String start,String end) throws InterruptedException {
         int PageSize = 200;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
         Map map = putParam();
         map.put("ICODE", rateDirect);
@@ -302,23 +311,25 @@ public class StaticDataController {
                  * start: 定义如何输入
                  * end:   定义如何输入
                  */
-                String json = RequestBeanToJson.getRateEntityReq(HotelID, LastRecordID, PageSize, "2020-09-09", "2020-09-09");
+                String json = RequestBeanToJson.getRateEntityReq(HotelID, LastRecordID, PageSize, start, end);
                 log.info("请求的json:{}", json);
                 String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
-                    log.warn("{}请求出现错误!错误信息{}", Thread.currentThread().getName(), result);
+                    log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                    break;
                 }
                 //添加至mongodb
-                List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, HotelID, "2016-05-5");
+                List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, HotelID, start);
                 List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, HotelID);
-                List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, HotelID, "2016-05-5");
+                List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, HotelID, start);
                 mongodbService.updatePriceDetail(priceDetailBean);
                 mongodbService.updatePolicyDetail(policyDetailBean);
                 mongodbService.updateCancelDetail(cancelDetailBean);
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
             } while (!"".equals(LastRecordID));
         }
+
     }
 }

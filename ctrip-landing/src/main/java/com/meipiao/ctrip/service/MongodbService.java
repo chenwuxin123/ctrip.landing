@@ -1,5 +1,7 @@
 package com.meipiao.ctrip.service;
 
+import com.meipiao.ctrip.entity.request.QueryRateBody;
+import com.meipiao.ctrip.entity.request.QuetyPolicyBody;
 import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
@@ -51,7 +53,7 @@ public class MongodbService {
             update.set("ContinentEnName", destination.getContinentEnName());
             update.set("Coordinates", destination.getCoordinates());
             update.set("ContinentName", destination.getContinentName());
-            update.set("UpdateTimeStamp", System.currentTimeMillis());
+            update.set("UpdateTimeStamp", System.currentTimeMillis() / 1000);
             mongoTemplate.upsert(query, update, Destination.class, "Destination");      //有则更新，没有则新增
             count++;
         }
@@ -81,7 +83,7 @@ public class MongodbService {
         Query query = new Query();
         query.addCriteria(Criteria.where("MasterHotelNum").is(hotelIdDetailBean.getMasterHotelNum()));//根据酒店id更新
         Update update = new Update();
-        update.set("UpdateTimeStamp", System.currentTimeMillis());
+        update.set("UpdateTimeStamp", System.currentTimeMillis() / 1000);
         update.set("MasterHotelNum", hotelIdDetailBean.getMasterHotelNum());
         update.set("DataFlag", hotelIdDetailBean.getDataFlag());
         update.set("DataFlagRemark", hotelIdDetailBean.getDataFlagRemark());
@@ -165,6 +167,7 @@ public class MongodbService {
             update.set("IsAllowRepricing", subRoomDetail.getIsAllowRepricing());
             update.set("IsAllowSmoking", subRoomDetail.getIsAllowSmoking());
             update.set("TimeLimitInfos", subRoomDetail.getTimeLimitInfos());
+            mongoTemplate.upsert(query, update, SubRoomDetail.class, "SubRoomDetail");      //有则更新，没有则新增
             count++;
         }
         return count;
@@ -175,9 +178,9 @@ public class MongodbService {
         int count = 0;
         for (PriceDetail priceDetail : priceDetailBean) {
             Query query = new Query();
-            query.addCriteria(Criteria.where("MasterHotelNum").is(priceDetail.getMasterHotelNum()).
-                    and("RoomId").is(priceDetail.getRoomId()).
-                    and("RoomCode").is(priceDetail.getRoomCode()));  //根据酒店id更新和物理房间id子房间id更新
+            query.addCriteria(Criteria.where("MasterHotelNum").is(priceDetail.getMasterHotelNum()));
+            query.addCriteria(Criteria.where("RoomId").is(priceDetail.getRoomId()));
+            query.addCriteria(Criteria.where("RoomCode").is(priceDetail.getRoomCode()));//根据酒店id更新和物理房间id子房间id更新
             Update update = new Update();
             update.set("UpdateTimeStamp", priceDetail.getUpdateTimeStamp());
             update.set("MasterHotelNum", priceDetail.getMasterHotelNum());
@@ -194,6 +197,7 @@ public class MongodbService {
             update.set("OriginalCostCurrency", priceDetail.getOriginalCostCurrency());
             update.set("RawPrice", priceDetail.getRawPrice());
             update.set("Currency", priceDetail.getCurrency());
+            mongoTemplate.upsert(query, update, PriceDetail.class, "PriceDetail");      //有则更新，没有则新增
             count++;
         }
         return count;
@@ -216,6 +220,7 @@ public class MongodbService {
             update.set("Breakfast", policyDetail.getBreakfast());
             update.set("Lunch", policyDetail.getLunch());
             update.set("Dinner", policyDetail.getDinner());
+            mongoTemplate.upsert(query, update, PolicyDetail.class, "PolicyDetail");      //有则更新，没有则新增
             count++;
         }
         return count;
@@ -238,8 +243,59 @@ public class MongodbService {
             update.set("Cancels", cancelDetail.getCancels());
             update.set("Start", cancelDetail.getStart());
             update.set("End", cancelDetail.getEnd());
+            mongoTemplate.upsert(query, update, CancelDetail.class, "CancelDetail");      //有则更新，没有则新增
             count++;
         }
         return count;
+    }
+
+    //条件搜索直连价格
+    public List<PriceDetail> queryPrice(QueryRateBody queryRateBody) {
+        Query query = new Query();
+        if (queryRateBody.getMasterHotelNum() != null && !queryRateBody.getMasterHotelNum().equals("")) {
+            query.addCriteria(Criteria.where("MasterHotelNum").is(queryRateBody.getMasterHotelNum()));
+        }
+        if (queryRateBody.getRoomId() != null && !queryRateBody.getRoomId().equals("")) {
+            query.addCriteria(Criteria.where("RoomId").is(queryRateBody.getRoomId()));
+        }
+        if (queryRateBody.getRoomCode() != null && !queryRateBody.getRoomCode().equals("")) {
+            query.addCriteria(Criteria.where("RoomCode").is(queryRateBody.getRoomCode()));
+        }
+        if (queryRateBody.getUseDay() != null && !queryRateBody.getUseDay().equals("")) {
+            query.addCriteria(Criteria.where("UseDay").is(queryRateBody.getUseDay()));
+        }
+        return mongoTemplate.find(query, PriceDetail.class, "PriceDetail");
+    }
+
+    //条件搜索直连政策
+    public List<PolicyDetail> queryPolicy(QuetyPolicyBody quetyPolicyBody) {
+        Query query = new Query();
+        if (quetyPolicyBody.getMasterHotelNum() != null && !quetyPolicyBody.getMasterHotelNum().equals("")) {
+            query.addCriteria(Criteria.where("MasterHotelNum").is(quetyPolicyBody.getMasterHotelNum()));
+        }
+        if (quetyPolicyBody.getRoomId() != null && !quetyPolicyBody.getRoomId().equals("")) {
+            query.addCriteria(Criteria.where("RoomId").is(quetyPolicyBody.getRoomId()));
+        }
+        if (quetyPolicyBody.getRoomCode() != null && !quetyPolicyBody.getRoomCode().equals("")) {
+            query.addCriteria(Criteria.where("RoomCode").is(quetyPolicyBody.getRoomCode()));
+        }
+        return mongoTemplate.find(query, PolicyDetail.class, "PolicyDetail");
+    }
+
+    public List<CancelDetail> queryCancel(QueryRateBody queryRateBody) {
+        Query query = new Query();
+        if (queryRateBody.getMasterHotelNum() != null && !queryRateBody.getMasterHotelNum().equals("")) {
+            query.addCriteria(Criteria.where("MasterHotelNum").is(queryRateBody.getMasterHotelNum()));
+        }
+        if (queryRateBody.getRoomId() != null && !queryRateBody.getRoomId().equals("")) {
+            query.addCriteria(Criteria.where("RoomId").is(queryRateBody.getRoomId()));
+        }
+        if (queryRateBody.getRoomCode() != null && !queryRateBody.getRoomCode().equals("")) {
+            query.addCriteria(Criteria.where("RoomCode").is(queryRateBody.getRoomCode()));
+        }
+        if (queryRateBody.getUseDay() != null && !queryRateBody.getUseDay().equals("")) {
+            query.addCriteria(Criteria.where("UseDay").is(queryRateBody.getUseDay()));
+        }
+        return mongoTemplate.find(query, CancelDetail.class, "CancelDetail");
     }
 }

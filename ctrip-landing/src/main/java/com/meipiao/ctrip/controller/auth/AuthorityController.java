@@ -52,8 +52,8 @@ public class AuthorityController {
     private ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 
     //初始化Access Token（GET方式）
+//    @GetMapping("/access/token")
     @ApiOperation(value = "初始化Access Token（GET方式）")
-    @GetMapping("/access/token")
     public String accessToken() {
         map.put("AID", aid);
         map.put("SID", sid);
@@ -67,8 +67,8 @@ public class AuthorityController {
     }
 
     //更新ACCESS TOKEN（GET方式）
+//    @GetMapping("/refresh/token")
     @ApiOperation(value = "更新ACCESS TOKEN（GET方式））")
-    @GetMapping("/refresh/token")
     public String refreshToken() {
         String access_token = null;
         // 根据持久化的key取得对应的值

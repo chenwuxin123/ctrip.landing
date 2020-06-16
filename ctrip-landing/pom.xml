@@ -80,7 +80,6 @@
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -95,6 +94,7 @@
     </dependencies>
 
     <build>
+        <finalName>ctrip-landing-1.0</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
