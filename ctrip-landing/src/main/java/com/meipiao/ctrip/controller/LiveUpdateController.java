@@ -29,6 +29,9 @@ public class LiveUpdateController {
     @Autowired
     StaticDataController staticDataController;
 
+    @Autowired
+    DisplayDataController displayDataController;
+
     @PostMapping("/rate")
     @ApiOperation(value = "直连价格实时拉取")
     @ApiImplicitParams({
@@ -42,7 +45,6 @@ public class LiveUpdateController {
         try {
             staticDataController.queryRate(list, start, end);
             //再调用查询接口
-
         } catch (InterruptedException e) {
             return R.fail();
         }

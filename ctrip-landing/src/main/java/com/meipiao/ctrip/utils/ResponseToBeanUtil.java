@@ -10,10 +10,7 @@ import com.meipiao.ctrip.entity.response.rate.CancelDetail;
 import com.meipiao.ctrip.entity.response.rate.CancelEntity;
 import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
 import com.meipiao.ctrip.entity.response.rate.PriceDetail;
-import com.meipiao.ctrip.entity.response.room.DateRestriction;
-import com.meipiao.ctrip.entity.response.room.RoomDetail;
-import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
-import com.meipiao.ctrip.entity.response.room.TimeLimitInfo;
+import com.meipiao.ctrip.entity.response.room.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -217,21 +214,32 @@ public class ResponseToBeanUtil {
             //Beds
             JSONArray beaArray = jsonRoomType.getJSONArray("RoomBedInfos");
             //床的信息
-            ArrayList<String> bedList = new ArrayList<>();
+            ArrayList<Beds> bedList = new ArrayList<>();
             for (Object bea : beaArray) {
-                String bedType = "";
                 JSONObject bed = JSONObject.parseObject(bea.toString());
                 //当床型分类ID为多床（ID=363）时，BedInfo数组中多个床型之间的关系为“且”；当床型分类ID非多床（ID!=363）时，BedInfo数组中多个床型之间的关系为“或”。
-                String logo = "|";
                 String badId = bed.getString("ID");
-                if ("363".equals(badId)) {
-                    logo = "&";
-                }
+                String bedName = bed.getString("Name");//床型名称(外层)
                 JSONArray bedInfoJson = bed.getJSONArray("BedInfo");
-                for (Object bedInfo : bedInfoJson) {
-                    bedType = JSONObject.parseObject(bedInfo.toString()).getString("Name") + logo;
+                ArrayList<BedInfo> bedInfosList = new ArrayList<>();
+                for (Object bedInfos : bedInfoJson) {
+                    JSONObject bedInfo = JSONObject.parseObject(bedInfos.toString());
+                    BedInfo bedInfoBean = new BedInfo();
+                    String bedInfoId = bedInfo.getString("ID");//具体床id
+                    String bedInfoName = bedInfo.getString("Name");//具体床名
+                    String numberOfBeds = bedInfo.getString("NumberOfBeds");
+                    String bedWidth = bedInfo.getString("BedWidth");
+                    bedInfoBean.setID(bedInfoId);
+                    bedInfoBean.setName(bedInfoName);
+                    bedInfoBean.setNumberOfBeds(numberOfBeds);
+                    bedInfoBean.setBedWidth(bedWidth);
+                    bedInfosList.add(bedInfoBean);
                 }
-                bedList.add(bedType);
+                Beds beds = new Beds();
+                beds.setID(badId);
+                beds.setName(bedName);
+                beds.setBedInfo(bedInfosList);
+                bedList.add(beds);
             }
             RoomDetail roomDetail = new RoomDetail();
             roomDetail.setUpdateTimeStamp(System.currentTimeMillis());
@@ -327,6 +335,7 @@ public class ResponseToBeanUtil {
                         for (Object dateRestriction : dateRestrictions) {
                             DateRestriction drc = new DateRestriction();
                             String scope = JSONObject.parseObject(dateRestriction.toString()).getString("Scope");
+                            System.err.println("获取的值" + scope);
                             String dateType = JSONObject.parseObject(dateRestriction.toString()).getString("DateType");
                             String start = JSONObject.parseObject(dateRestriction.toString()).getString("Start");
                             String end = JSONObject.parseObject(dateRestriction.toString()).getString("End");
@@ -370,7 +379,7 @@ public class ResponseToBeanUtil {
                         Integer lunch = mealInfo.getInteger("NumberOfLunch");
                         Integer dinner = mealInfo.getInteger("NumberOfDinner");
                         PolicyDetail policyDetail = new PolicyDetail();
-                        policyDetail.setUpdateTimeStamp(System.currentTimeMillis()/1000);
+                        policyDetail.setUpdateTimeStamp(System.currentTimeMillis() / 1000);
                         policyDetail.setBreakfast(breakfast);//早
                         policyDetail.setLunch(lunch);//中
                         policyDetail.setDinner(dinner);//晚
@@ -388,7 +397,7 @@ public class ResponseToBeanUtil {
     }
 
     //直连价格
-    public static List<PriceDetail> getPriceDetailBean(String result, String masterHotelNum, String useDay) {
+    public static List<PriceDetail> getPriceDetailBean(String result, String masterHotelNum) {
         ArrayList<PriceDetail> pdList = new ArrayList<>();
         JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
         //RoomPriceItems
@@ -407,14 +416,16 @@ public class ResponseToBeanUtil {
                     String remainingRooms = priceInfoJson.getString("RemainingRooms");//可定房量
                     JSONArray dailyPrices = priceInfoJson.getJSONArray("DailyPrices");
                     //DailyPrices
-                    PriceDetail priceDetail = new PriceDetail();
                     for (Object dailyPrice : dailyPrices) {
+                        PriceDetail priceDetail = new PriceDetail();
                         JSONArray prices = JSONObject.parseObject(dailyPrice.toString()).getJSONArray("Prices");
+                        String useDay = JSONObject.parseObject(dailyPrice.toString()).getString("EffectiveDate");//每日价的生效日期
                         //Prices
                         for (Object price : prices) {
                             JSONObject priceJson = JSONObject.parseObject(price.toString());
                             String type = priceJson.getString("Type");//卖价 or 结算价?
                             String inclusiveAmount = priceJson.getString("InclusiveAmount");//税后价格
+                            String currency = priceJson.getString("Currency");//货币种类
                             if ("DisplayCostCurrency".equals(type)) {
                                 priceDetail.setDisplayCostCurrency(inclusiveAmount);
                             } else if ("OriginalCostCurrency".equals(type)) {
@@ -424,13 +435,14 @@ public class ResponseToBeanUtil {
                             } else if ("OriginalCurrency".equals(type)) {
                                 priceDetail.setOriginalCurrency(inclusiveAmount);
                             }
-                            priceDetail.setUpdateTimeStamp(System.currentTimeMillis()/1000);
+                            priceDetail.setCurrency(currency);
                             priceDetail.setUseDay(useDay);//请求的日期
-                            priceDetail.setMasterHotelNum(masterHotelNum);
-                            priceDetail.setRoomId(roomId);
-                            priceDetail.setRoomCode(roomCode);
-                            priceDetail.setRemainingRooms(remainingRooms);
                         }
+                        priceDetail.setUpdateTimeStamp(System.currentTimeMillis() / 1000);
+                        priceDetail.setMasterHotelNum(masterHotelNum);
+                        priceDetail.setRoomId(roomId);
+                        priceDetail.setRoomCode(roomCode);
+                        priceDetail.setRemainingRooms(remainingRooms);
                         pdList.add(priceDetail);
                     }
                 }
@@ -440,7 +452,7 @@ public class ResponseToBeanUtil {
     }
 
     //直连取消规则
-    public static List<CancelDetail> getCancelDetailBean(String result, String masterHotelNum, String useDay) {
+    public static List<CancelDetail> getCancelDetailBean(String result, String masterHotelNum) {
         ArrayList<CancelDetail> cancelList = new ArrayList<>();
         JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
         //RoomPriceItems
@@ -452,12 +464,13 @@ public class ResponseToBeanUtil {
             for (Object roomPriceInfo : roomPriceInfos) {
                 JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
                 String roomCode = roomPriceJson.getString("RoomID");//子房型id
+
                 JSONArray cancelPolicyInfos = roomPriceJson.getJSONArray("CancelPolicyInfos");
                 //CancelPolicyInfos
                 for (Object cancelPolicyInfo : cancelPolicyInfos) {
                     JSONObject cancelJson = JSONObject.parseObject(cancelPolicyInfo.toString());
-                    String start = cancelJson.getString("Start");
-                    String end = cancelJson.getString("End");
+                    String start = cancelJson.getString("Start");//取消政策的生效时间。 备注：Start定义了最晚免费取消时间。Start时间之前，客人可免费取消；Start之后，客人需承担相应罚金。
+                    String end = cancelJson.getString("End");//取消政策的失效时间
                     JSONArray penaltyAmount = cancelJson.getJSONArray("PenaltyAmount");
                     //PenaltyAmount
                     ArrayList<CancelEntity> ceList = new ArrayList<>();
@@ -473,11 +486,10 @@ public class ResponseToBeanUtil {
                         ceList.add(cancelEntity);
                     }
                     CancelDetail cancelDetail = new CancelDetail();
-                    cancelDetail.setUpdateTimeStamp(System.currentTimeMillis()/1000);
+                    cancelDetail.setUpdateTimeStamp(System.currentTimeMillis() / 1000);
                     cancelDetail.setMasterHotelNum(masterHotelNum);
                     cancelDetail.setRoomId(roomId);//物理房型id
                     cancelDetail.setRoomCode(roomCode);//子房型id
-                    cancelDetail.setUseDay(useDay);//传参 哪天使用
                     cancelDetail.setCancels(ceList);
                     cancelDetail.setStart(start);
                     cancelDetail.setEnd(end);

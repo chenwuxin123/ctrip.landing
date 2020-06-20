@@ -180,7 +180,8 @@ public class MongodbService {
             Query query = new Query();
             query.addCriteria(Criteria.where("MasterHotelNum").is(priceDetail.getMasterHotelNum()));
             query.addCriteria(Criteria.where("RoomId").is(priceDetail.getRoomId()));
-            query.addCriteria(Criteria.where("RoomCode").is(priceDetail.getRoomCode()));//根据酒店id更新和物理房间id子房间id更新
+            query.addCriteria(Criteria.where("RoomCode").is(priceDetail.getRoomCode()));
+            query.addCriteria(Criteria.where("UseDay").is(priceDetail.getUseDay()));//根据酒店id更新和物理房间id子房间id可用日期更新
             Update update = new Update();
             update.set("UpdateTimeStamp", priceDetail.getUpdateTimeStamp());
             update.set("MasterHotelNum", priceDetail.getMasterHotelNum());

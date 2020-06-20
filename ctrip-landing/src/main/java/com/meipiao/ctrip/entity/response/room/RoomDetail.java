@@ -97,6 +97,6 @@ public class RoomDetail implements Serializable {
     /// <summary>
     /// 床型信息
     /// </summary>
-    private List<String> Beds;
+    private List<Beds> Beds;
 
 }
