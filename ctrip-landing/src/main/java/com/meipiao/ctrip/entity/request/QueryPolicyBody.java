@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @ApiModel(description = "请求体参数")
-public class QuetyPolicyBody implements Serializable {
+public class QueryPolicyBody implements Serializable {
     @ApiModelProperty(value = "酒店id", example = "19754999")
     private String masterHotelNum;
 

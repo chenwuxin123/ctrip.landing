@@ -23,22 +23,16 @@ import java.util.List;
  */
 public class ResponseToBeanUtil {
     public static void main(String[] args) {
-
-        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-12T16:40:42.948+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"PagingInfo\":{\"LastRecordID\":\"1A1000003292\"},\"CityInfos\":{\"CityInfo\":[{\"Coordinates\":[{\"Provider\":\"BD\",\"LNG\":116.4137840210,\"LAT\":39.9105329229}],\"CityID\":\"1\",\"CityName\":\"北京\",\"CityEnName\":\"Beijing\",\"ParentCityID\":\"\",\"ParentCityName\":\"\",\"ParentCityEnName\":\"\",\"ProvinceID\":\"1\",\"ProvinceName\":\"北京\",\"ProvinceEnName\":\"Beijing\",\"CountryID\":\"1\",\"CountryName\":\"中国\",\"CountryEnName\":\"China\",\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"ContinentEnName\":\"Asia\"},{\"Coordinates\":[{\"Provider\":\"BD\",\"LNG\":121.4802384079,\"LAT\":31.2363508011}],\"CityID\":\"2\",\"CityName\":\"上海\",\"CityEnName\":\"Shanghai\",\"ParentCityID\":\"\",\"ParentCityName\":\"\",\"ParentCityEnName\":\"\",\"ProvinceID\":\"2\",\"ProvinceName\":\"上海\",\"ProvinceEnName\":\"Shanghai\",\"CountryID\":\"1\",\"CountryName\":\"中国\",\"CountryEnName\":\"China\",\"ContinentID\":\"1\",\"ContinentName\":\"亚洲\",\"ContinentEnName\":\"Asia\"}]}}\n";
-
-        ArrayList<Destination> destinationBean = getDestinationBean(result);
-        for (Destination destination : destinationBean) {
-            System.out.println(destination.toString());
-        }
-
+        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-22T11:10:36.423+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]}}";
+        String lastRecordID = getLastRecordID(result);
+        System.out.println(lastRecordID);
     }
 
     public static String getResponseStatus(String result) {
         JSONObject obj = JSONObject.parseObject(result);
         //获取状态码
         JSONObject responseStatus = JSONObject.parseObject(obj.getString("ResponseStatus"));
-        String ack = responseStatus.getString("Ack");
-        return ack;
+        return responseStatus.getString("Ack");
     }
 
 
@@ -46,8 +40,10 @@ public class ResponseToBeanUtil {
         JSONObject obj = JSONObject.parseObject(result);
         //获取LastRecordID
         JSONObject pagingInfo = JSONObject.parseObject(obj.getString("PagingInfo"));
-        String lastRecordID = pagingInfo.getString("LastRecordID");
-        return lastRecordID;
+        if (pagingInfo == null) {
+            return "";
+        }
+        return pagingInfo.getString("LastRecordID");
     }
 
     //全量城市

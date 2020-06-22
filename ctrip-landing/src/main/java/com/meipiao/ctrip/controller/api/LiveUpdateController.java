@@ -34,15 +34,13 @@ public class LiveUpdateController {
     @PostMapping("/rate")
     @ApiOperation(value = "直连价格实时拉取")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "hotelIds", value = "酒店id", required = true, example = "1216012"),
+            @ApiImplicitParam(name = "hotelId", value = "酒店id", required = true, example = "1216012"),
             @ApiImplicitParam(name = "start", value = "入住日期", required = true, example = "2020-06-14"),
             @ApiImplicitParam(name = "end", value = "离店日期", required = true, example = "2020-06-14")
     })
-    public Result liveRate(String hotelIds, String start, String end) {
-        List<String> list = new ArrayList<>();
-        list.add(hotelIds);
+    public Result liveRate(String hotelId, String start, String end) {
         try {
-            staticDataController.queryRate(list, start, end);
+            staticDataController.queryRate(hotelId, start, end);
             //再调用查询接口
         } catch (InterruptedException e) {
             return Result.fail();

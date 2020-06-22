@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,26 +40,26 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author: Chenwx
  * @Date: 2020/6/9 10:16
  */
-@RestController
 @Slf4j
+@RestController
 @SuppressWarnings("unchecked")
 @RequestMapping("/api")
 @Api(value = "Ctrip Data Landing API", tags = {"携程数据落地API"})
 public class StaticDataController {
 
-    @Autowired
+    @Resource
     AuthorityController authorityController;
 
-    @Autowired
+    @Resource
     MongoTemplate mongoTemplate;
 
     @Resource
     RedisUtil redisUtil;
 
-    @Autowired
+    @Resource
     MongoAggregationUtil mongoAggregationUtil;
 
-    @Autowired
+    @Resource
     MongodbService mongodbService;
 
     @Value("${CITY.ICODE}")
@@ -74,6 +76,9 @@ public class StaticDataController {
 
     @Value("${RATE.DIRECT}")
     private String rateDirect;   //报价实时查询接口（国内酒店+海外酒店)
+
+    @Value("${MONITOR.ROOM.INCREMENT}")
+    private String roomIncrementICODE;   //监测房价、房量、房态增量变化ICODE
 
     @Value("${ctrip.http.address}")
     private String httpAddress;     //携程请求地址
@@ -324,4 +329,35 @@ public class StaticDataController {
             LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
         } while (!"".equals(LastRecordID));
     }
+
+    @GetMapping("/change/price")
+    @ApiOperation(value = "监测房价、房量、房态增量变化接口")
+    public void changePrice() throws InterruptedException {
+        int PageSize = 1000;//每页最多返回几条记录
+        Map map = putParam();
+        map.put("ICODE", roomIncrementICODE);
+        String UUID = java.util.UUID.randomUUID().toString();
+
+        String LastRecordID = "";
+        do {
+            //获得Access Token
+            String accessToken = getAccessToken(UUID);
+            map.put("Token", accessToken);
+            //请求json
+//            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
+            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize,"20120-06-20T17:23:09.777+08:00" );
+            log.info("请求的json:{}", json);
+            String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+            String result = HttpClientUtil.doPostJson(serverHost, map, json);
+            String ack = ResponseToBeanUtil.getResponseStatus(result);
+            if (!"Success".equals(ack)) {
+                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                break;
+            }
+            //如何处理
+            System.out.println(result);
+            LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
+        } while (!"".equals(LastRecordID));
+    }
+
 }

@@ -5,6 +5,9 @@ import com.meipiao.ctrip.entity.request.city.GetCityEntityReq;
 import com.meipiao.ctrip.entity.request.city.SearchByType;
 import com.meipiao.ctrip.entity.request.city.SearchCandidate;
 import com.meipiao.ctrip.entity.request.hotel.*;
+import com.meipiao.ctrip.entity.request.inctement.GetPriceEntityReq;
+import com.meipiao.ctrip.entity.request.inctement.IncrPriceSearchCandidate;
+import com.meipiao.ctrip.entity.request.inctement.IncrPriceSettings;
 import com.meipiao.ctrip.entity.request.page.PagingSettings;
 import com.meipiao.ctrip.entity.request.rate.*;
 import com.meipiao.ctrip.entity.request.room.GetRoomStaticReq;
@@ -12,6 +15,9 @@ import com.meipiao.ctrip.entity.request.room.RoomSearchCandidate;
 import com.meipiao.ctrip.entity.request.room.RoomSettings;
 import com.meipiao.ctrip.entity.request.room.SearchTagsItem;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -23,8 +29,8 @@ import java.util.ArrayList;
 public class RequestBeanToJson {
 
     public static void main(String[] args) {
-        String s = getRoomStaticReq("2222",10,"");
-        System.out.println(s);
+
+
     }
 
     //获取全量城市信息请求参数(json)
@@ -166,7 +172,30 @@ public class RequestBeanToJson {
 
         getRateEntityReq.setSearchCandidate(searchCandidate);
 
-        String json = JSON.toJSONString(getRateEntityReq);
-        return json;
+        return JSON.toJSONString(getRateEntityReq);
+    }
+
+    //监测房价、房量、房态增量(json)
+    public static String getIncrPriceEntityReq(String lastRecordID, Integer pageSize, String startTime) {
+        GetPriceEntityReq getPriceEntityReq = new GetPriceEntityReq();
+        //PagingSettings
+        PagingSettings pagingSettings = new PagingSettings();
+        pagingSettings.setLastRecordID(lastRecordID);//酒店ID
+        pagingSettings.setPageSize(pageSize);//分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
+        getPriceEntityReq.setPagingSettings(pagingSettings);
+
+        //Settings
+        IncrPriceSettings incrPriceSettings = new IncrPriceSettings();
+        incrPriceSettings.setShowDataRange("");//不填写，则返回房价、房量、房态的增量。
+        incrPriceSettings.setIsShowChangeDetails("T");
+        getPriceEntityReq.setSettings(incrPriceSettings);
+
+        //SearchCandidate
+        IncrPriceSearchCandidate incrPriceSearchCandidate = new IncrPriceSearchCandidate();
+        incrPriceSearchCandidate.setStartTime(startTime);
+        incrPriceSearchCandidate.setDuration(0);
+        getPriceEntityReq.setSearchCandidate(incrPriceSearchCandidate);
+
+        return JSON.toJSONString(getPriceEntityReq);
     }
 }

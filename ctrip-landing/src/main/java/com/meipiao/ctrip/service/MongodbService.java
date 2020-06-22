@@ -1,7 +1,7 @@
 package com.meipiao.ctrip.service;
 
 import com.meipiao.ctrip.entity.request.QueryRateBody;
-import com.meipiao.ctrip.entity.request.QuetyPolicyBody;
+import com.meipiao.ctrip.entity.request.QueryPolicyBody;
 import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
@@ -269,7 +269,7 @@ public class MongodbService {
     }
 
     //条件搜索直连政策
-    public List<PolicyDetail> queryPolicy(QuetyPolicyBody quetyPolicyBody) {
+    public List<PolicyDetail> queryPolicy(QueryPolicyBody quetyPolicyBody) {
         Query query = new Query();
         if (quetyPolicyBody.getMasterHotelNum() != null && !quetyPolicyBody.getMasterHotelNum().equals("")) {
             query.addCriteria(Criteria.where("MasterHotelNum").is(quetyPolicyBody.getMasterHotelNum()));

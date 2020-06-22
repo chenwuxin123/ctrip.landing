@@ -2,7 +2,7 @@ package com.meipiao.ctrip.controller.api;
 
 import com.meipiao.ctrip.common.Result;
 import com.meipiao.ctrip.entity.request.QueryRateBody;
-import com.meipiao.ctrip.entity.request.QuetyPolicyBody;
+import com.meipiao.ctrip.entity.request.QueryPolicyBody;
 import com.meipiao.ctrip.entity.response.rate.CancelDetail;
 import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
 import com.meipiao.ctrip.entity.response.rate.PriceDetail;
@@ -51,7 +51,7 @@ public class DisplayDataController {
 
     @PostMapping("/policy")
     @ApiOperation(value = "条件搜索直连政策")
-    public Result queryPolicy(@RequestBody QuetyPolicyBody quetyPolicyBody) {
+    public Result queryPolicy(@RequestBody QueryPolicyBody quetyPolicyBody) {
         List<PolicyDetail> policyDetails = mongodbService.queryPolicy(quetyPolicyBody);
         log.info("此次共查询到{}条数据", policyDetails.size());
         if (policyDetails.size() > 0) {
