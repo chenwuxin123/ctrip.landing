@@ -10,7 +10,7 @@ import lombok.Data;
  */
 @Data
 @ApiModel("返回的结果体")
-public class R<T> {
+public class Result<T> {
     @ApiModelProperty(value = "是否成功")
     private Boolean success;
 
@@ -23,57 +23,57 @@ public class R<T> {
     @ApiModelProperty(value = "返回的数据")
     private T data;
 
-    private R() {
+    private Result() {
     }
 
-    public static R ok() {
-        R r = new R();
+    public static Result ok() {
+        Result r = new Result();
         r.setSuccess(true);
         r.setCode(ResultCode.SUCCESS);
         r.setMessage("success");
         return r;
     }
 
-    public static R nullData() {
-        R r = new R();
+    public static Result nullData() {
+        Result r = new Result();
         r.setSuccess(true);
         r.setCode(ResultCode.HALF_SUCCESS);
         r.setMessage("success");
         return r;
     }
 
-    public static R error() {
-        R r = new R();
+    public static Result error() {
+        Result r = new Result();
         r.setSuccess(false);
         r.setCode(ResultCode.ERROR);
         r.setMessage("error");
         return r;
     }
 
-    public static R fail() {
-        R r = new R();
+    public static Result fail() {
+        Result r = new Result();
         r.setSuccess(false);
         r.setCode(ResultCode.FAIL);
         r.setMessage("fail");
         return r;
     }
 
-    public R success(Boolean success) {
+    public Result success(Boolean success) {
         this.setSuccess(success);
         return this;
     }
 
-    public R code(Integer code) {
+    public Result code(Integer code) {
         this.setCode(code);
         return this;
     }
 
-    public R message(String message) {
+    public Result message(String message) {
         this.setMessage(message);
         return this;
     }
 
-    public R data(T t) {
+    public Result data(T t) {
         this.setData(t);
         return this;
     }

@@ -1,6 +1,6 @@
-package com.meipiao.ctrip.controller;
+package com.meipiao.ctrip.controller.api;
 
-import com.meipiao.ctrip.common.R;
+import com.meipiao.ctrip.common.Result;
 import com.meipiao.ctrip.entity.request.QueryRateBody;
 import com.meipiao.ctrip.entity.request.QuetyPolicyBody;
 import com.meipiao.ctrip.entity.response.rate.CancelDetail;
@@ -34,7 +34,7 @@ public class DisplayDataController {
 
     @PostMapping("/price")
     @ApiOperation(value = "条件搜索直连价格")
-    public R queryPrice(@RequestBody QueryRateBody queryRateBody) {
+    public Result queryPrice(@RequestBody QueryRateBody queryRateBody) {
         List<PriceDetail> priceDetails = mongodbService.queryPrice(queryRateBody);
         log.info("此次共查询到{}条数据", priceDetails.size());
         if (priceDetails.size() > 0) {
@@ -44,14 +44,14 @@ public class DisplayDataController {
                 map.put("priceDetail", priceDetail);
                 list.add(map);
             }
-            return R.ok().data(list);
+            return Result.ok().data(list);
         }
-        return R.nullData();
+        return Result.nullData();
     }
 
     @PostMapping("/policy")
     @ApiOperation(value = "条件搜索直连政策")
-    public R queryPolicy(@RequestBody QuetyPolicyBody quetyPolicyBody) {
+    public Result queryPolicy(@RequestBody QuetyPolicyBody quetyPolicyBody) {
         List<PolicyDetail> policyDetails = mongodbService.queryPolicy(quetyPolicyBody);
         log.info("此次共查询到{}条数据", policyDetails.size());
         if (policyDetails.size() > 0) {
@@ -61,14 +61,14 @@ public class DisplayDataController {
                 map.put("policyDetail", policyDetail);
                 list.add(map);
             }
-            return R.ok().data(list);
+            return Result.ok().data(list);
         }
-        return R.nullData();
+        return Result.nullData();
     }
 
     @PostMapping("/cancel")
     @ApiOperation(value = "条件搜索直连取消规则")
-    public R queryPolicy(@RequestBody QueryRateBody queryRateBody) {
+    public Result queryPolicy(@RequestBody QueryRateBody queryRateBody) {
         List<CancelDetail> cancelDetails = mongodbService.queryCancel(queryRateBody);
         log.info("此次共查询到{}条数据", cancelDetails.size());
         if (cancelDetails.size() > 0) {
@@ -78,8 +78,8 @@ public class DisplayDataController {
                 map.put("cancelDetail", cancelDetail);
                 list.add(map);
             }
-            return R.ok().data(list);
+            return Result.ok().data(list);
         }
-        return R.nullData();
+        return Result.nullData();
     }
 }

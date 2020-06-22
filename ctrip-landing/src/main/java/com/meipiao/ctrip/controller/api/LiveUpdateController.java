@@ -1,7 +1,6 @@
-package com.meipiao.ctrip.controller;
+package com.meipiao.ctrip.controller.api;
 
-import com.meipiao.ctrip.common.R;
-import com.meipiao.ctrip.controller.api.StaticDataController;
+import com.meipiao.ctrip.common.Result;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -39,15 +38,15 @@ public class LiveUpdateController {
             @ApiImplicitParam(name = "start", value = "入住日期", required = true, example = "2020-06-14"),
             @ApiImplicitParam(name = "end", value = "离店日期", required = true, example = "2020-06-14")
     })
-    public R liveRate(String hotelIds, String start, String end) {
+    public Result liveRate(String hotelIds, String start, String end) {
         List<String> list = new ArrayList<>();
         list.add(hotelIds);
         try {
             staticDataController.queryRate(list, start, end);
             //再调用查询接口
         } catch (InterruptedException e) {
-            return R.fail();
+            return Result.fail();
         }
-        return R.ok();
+        return Result.ok();
     }
 }

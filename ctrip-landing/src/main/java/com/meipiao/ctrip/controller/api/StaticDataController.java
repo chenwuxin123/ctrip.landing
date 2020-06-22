@@ -255,20 +255,57 @@ public class StaticDataController {
 
      */
     @Async
-    public void getRoomStatic(List<String> hotelIds) throws InterruptedException {
+    public void getRoomStatic(String hotelId) throws InterruptedException {
 
         int PageSize = 1000; //分页每次请求售卖房型数量，最大限制1000
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", roomInfoICODE);
         String UUID = java.util.UUID.randomUUID().toString();
+        String LastRecordID = "";
+        //获得Access Token
+        String accessToken = getAccessToken(UUID);
+        map.put("Token", accessToken);
+        String json = RequestBeanToJson.getRoomStaticReq(hotelId, PageSize, LastRecordID);
+        log.info("请求的json:{}", json);
+        String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+        String result = HttpClientUtil.doPostJson(serverHost, map, json);
+        String ack = ResponseToBeanUtil.getResponseStatus(result);
+        if (!"Success".equals(ack)) {
+            log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+            return;
+        }
+        //获取实体集合，添加至mongodb
+        List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, hotelId);
+        mongodbService.updateRoomStatic(roomStaticBean);
+        List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, hotelId);
+        mongodbService.updateSubRoomStatic(subRoomStaticBean);
+    }
 
-        for (String HotelID : hotelIds) {
-            String LastRecordID = "";
+
+    /*
+        @GetMapping("/query/rate")
+        @ApiOperation(value = "直连查询")
+
+     */
+    @Async
+    public void queryRate(String hotelId, String start, String end) throws InterruptedException {
+        int PageSize = 200;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
+        Map map = putParam();
+        map.put("ICODE", rateDirect);
+        String UUID = java.util.UUID.randomUUID().toString();
+
+        String LastRecordID = "";
+        do {
             //获得Access Token
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
-            String json = RequestBeanToJson.getRoomStaticReq(HotelID, PageSize, LastRecordID);
+            //请求json
+            /**
+             * start: 定义如何输入
+             * end:   定义如何输入
+             */
+            String json = RequestBeanToJson.getRateEntityReq(hotelId, LastRecordID, PageSize, start, end);
             log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
@@ -277,57 +314,14 @@ public class StaticDataController {
                 log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
                 break;
             }
-            System.out.println(result);
-            //获取实体集合，添加至mongodb
-            List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, HotelID);
-            mongodbService.updateRoomStatic(roomStaticBean);
-            List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, HotelID);
-            mongodbService.updateSubRoomStatic(subRoomStaticBean);
-        }
-    }
-
-    /*
-        @GetMapping("/query/rate")
-        @ApiOperation(value = "直连查询")
-
-     */
-    @Async
-    public void queryRate(List<String> hotelIds, String start, String end) throws InterruptedException {
-        int PageSize = 200;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
-        Map map = putParam();
-        map.put("ICODE", rateDirect);
-        String UUID = java.util.UUID.randomUUID().toString();
-
-        for (String hotelID : hotelIds) {
-            String LastRecordID = "";
-            do {
-                //获得Access Token
-                String accessToken = getAccessToken(UUID);
-                map.put("Token", accessToken);
-                //请求json
-                /**
-                 * start: 定义如何输入
-                 * end:   定义如何输入
-                 */
-                String json = RequestBeanToJson.getRateEntityReq(hotelID, LastRecordID, PageSize, start, end);
-                log.info("请求的json:{}", json);
-                String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
-                String result = HttpClientUtil.doPostJson(serverHost, map, json);
-                String ack = ResponseToBeanUtil.getResponseStatus(result);
-                if (!"Success".equals(ack)) {
-                    log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
-                    break;
-                }
-                //添加至mongodb
-                List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, hotelID);
-                List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, hotelID);
-                List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, hotelID);
-                mongodbService.updatePriceDetail(priceDetailBean);
-                mongodbService.updatePolicyDetail(policyDetailBean);
-                mongodbService.updateCancelDetail(cancelDetailBean);
-                LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
-            } while (!"".equals(LastRecordID));
-        }
-
+            //添加至mongodb
+            List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, hotelId);
+            List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, hotelId);
+            List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, hotelId);
+            mongodbService.updatePriceDetail(priceDetailBean);
+            mongodbService.updatePolicyDetail(policyDetailBean);
+            mongodbService.updateCancelDetail(cancelDetailBean);
+            LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
+        } while (!"".equals(LastRecordID));
     }
 }

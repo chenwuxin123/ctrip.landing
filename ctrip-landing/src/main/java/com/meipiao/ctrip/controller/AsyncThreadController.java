@@ -75,71 +75,71 @@ public class AsyncThreadController {
         executorService.shutdown();// 关闭线程池
     }
 
-    @GetMapping("/async/static/room")
-    @ApiOperation(value = "房型静态信息异步拉取")
-    @ApiImplicitParam(value = "线程数", required = true)
-    public void asyncStaticRooM(int threadCount) {
+//    @GetMapping("/async/static/room")
+//    @ApiOperation(value = "房型静态信息异步拉取")
+//    @ApiImplicitParam(value = "线程数", required = true)
+//    public void asyncStaticRooM(int threadCount) {
+//
+//        //创建线程池
+//        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
+//        //查找酒店id
+//        ArrayList<String> list = mongoAggregationUtil.findAllHotelId("HotelId");
+//        //解析list 均等分给线程
+//        int total = list.size();
+//        int copy = total / threadCount;
+//        for (int i = 0; i < threadCount; i++) {
+//            List<String> subList;
+//            if (i != threadCount - 1) {
+//                subList = list.subList(copy * i, copy * (i + 1));// fromIndex（包括 ）和 toIndex（不包括）
+//            } else {
+//                subList = list.subList(copy * i, total);
+//            }
+//            executorService.execute(() -> {
+//                try {
+//                    log.info("房型静态信息异步拉取开始执行...");
+//                    staticDataController.getRoomStatic(subList);
+//                } catch (InterruptedException e) {
+//                    log.error(e.getMessage());
+//                }
+//            });
+//        }
+//        executorService.shutdown();
+//    }
 
-        //创建线程池
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
-        //查找酒店id
-        ArrayList<String> list = mongoAggregationUtil.findAllHotelId("HotelId");
-        //解析list 均等分给线程
-        int total = list.size();
-        int copy = total / threadCount;
-        for (int i = 0; i < threadCount; i++) {
-            List<String> subList;
-            if (i != threadCount - 1) {
-                subList = list.subList(copy * i, copy * (i + 1));// fromIndex（包括 ）和 toIndex（不包括）
-            } else {
-                subList = list.subList(copy * i, total);
-            }
-            executorService.execute(() -> {
-                try {
-                    log.info("房型静态信息异步拉取开始执行...");
-                    staticDataController.getRoomStatic(subList);
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage());
-                }
-            });
-        }
-        executorService.shutdown();
-    }
-
-    @GetMapping("/async/rate")
-    @ApiOperation(value = "报价实时查询接口异步拉取")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "threadCount", value = "线程数", required = true),
-            @ApiImplicitParam(name = "start", value = "入住日期", required = true),
-            @ApiImplicitParam(name = "end", value = "离店日期", required = true),
-    })
-    public void asyncRate(int threadCount, String start, String end) {
-
-        //创建线程池
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
-        //查找酒店id
-        ArrayList<String> list = mongoAggregationUtil.findAllHotelId("HotelId");
-        //解析list 均等分给线程
-        int total = list.size();
-        int copy = total / threadCount;
-        for (int i = 0; i < threadCount; i++) {
-            List<String> subList;
-            if (i != threadCount - 1) {
-                subList = list.subList(copy * i, copy * (i + 1));// fromIndex（包括 ）和 toIndex（不包括）
-            } else {
-                subList = list.subList(copy * i, total);
-            }
-            executorService.execute(() -> {
-                try {
-                    log.info("报价实时查询接口异步拉取开始执行...");
-                    staticDataController.queryRate(subList, start, end);
-                } catch (InterruptedException e) {
-                    log.error(e.getMessage());
-                }
-            });
-        }
-        executorService.shutdown();
-    }
+//    @GetMapping("/async/rate")
+//    @ApiOperation(value = "报价实时查询接口异步拉取")
+//    @ApiImplicitParams({
+//            @ApiImplicitParam(name = "threadCount", value = "线程数", required = true),
+//            @ApiImplicitParam(name = "start", value = "入住日期", required = true),
+//            @ApiImplicitParam(name = "end", value = "离店日期", required = true),
+//    })
+//    public void asyncRate(int threadCount, String start, String end) {
+//
+//        //创建线程池
+//        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(threadCount);
+//        //查找酒店id
+//        ArrayList<String> list = mongoAggregationUtil.findAllHotelId("HotelId");
+//        //解析list 均等分给线程
+//        int total = list.size();
+//        int copy = total / threadCount;
+//        for (int i = 0; i < threadCount; i++) {
+//            List<String> subList;
+//            if (i != threadCount - 1) {
+//                subList = list.subList(copy * i, copy * (i + 1));// fromIndex（包括 ）和 toIndex（不包括）
+//            } else {
+//                subList = list.subList(copy * i, total);
+//            }
+//            executorService.execute(() -> {
+//                try {
+//                    log.info("报价实时查询接口异步拉取开始执行...");
+//                    staticDataController.queryRate(subList, start, end);
+//                } catch (InterruptedException e) {
+//                    log.error(e.getMessage());
+//                }
+//            });
+//        }
+//        executorService.shutdown();
+//    }
 
 
 }
