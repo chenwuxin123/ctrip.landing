@@ -141,10 +141,10 @@ public class AuthorityController {
         boolean saveResultExpires = redisUtil.hset(tokenKey, access_token, refresh_token, expires_in);
         boolean saveResult = redisUtil.hset(persistenceTokenKey, access_token, refresh_token);
         if (saveResultExpires && saveResult) {
-            log.info("{}:token{}--缓存成功!", LocalDateTime.now(), access_token);
+            log.info("{}:token `{}` 缓存成功!", LocalDateTime.now(), access_token);
             return access_token;
         }
-        log.error("{}:token--{}缓存失败!", LocalDateTime.now(), access_token);
+        log.error("{}:token `{}` 缓存失败!", LocalDateTime.now(), access_token);
         return "fail";
     }
 

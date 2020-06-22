@@ -267,24 +267,28 @@ public class StaticDataController {
         Map map = putParam();
         map.put("ICODE", roomInfoICODE);
         String UUID = java.util.UUID.randomUUID().toString();
+
         String LastRecordID = "";
-        //获得Access Token
-        String accessToken = getAccessToken(UUID);
-        map.put("Token", accessToken);
-        String json = RequestBeanToJson.getRoomStaticReq(hotelId, PageSize, LastRecordID);
-        log.info("请求的json:{}", json);
-        String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
-        String result = HttpClientUtil.doPostJson(serverHost, map, json);
-        String ack = ResponseToBeanUtil.getResponseStatus(result);
-        if (!"Success".equals(ack)) {
-            log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
-            return;
-        }
-        //获取实体集合，添加至mongodb
-        List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, hotelId);
-        mongodbService.updateRoomStatic(roomStaticBean);
-        List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, hotelId);
-        mongodbService.updateSubRoomStatic(subRoomStaticBean);
+        do {
+            //获得Access Token
+            String accessToken = getAccessToken(UUID);
+            map.put("Token", accessToken);
+            String json = RequestBeanToJson.getRoomStaticReq(hotelId, PageSize, LastRecordID);
+            log.info("请求的json:{}", json);
+            String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+            String result = HttpClientUtil.doPostJson(serverHost, map, json);
+            String ack = ResponseToBeanUtil.getResponseStatus(result);
+            if (!"Success".equals(ack)) {
+                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                return;
+            }
+            //获取实体集合，添加至mongodb
+            List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, hotelId);
+            mongodbService.updateRoomStatic(roomStaticBean);
+            List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, hotelId);
+            mongodbService.updateSubRoomStatic(subRoomStaticBean);
+            LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
+        } while (!"".equals(LastRecordID));
     }
 
 
@@ -345,7 +349,7 @@ public class StaticDataController {
             map.put("Token", accessToken);
             //请求json
 //            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
-            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize,"20120-06-20T17:23:09.777+08:00" );
+            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, "2018-01-05T15:00:00.000+08:00");
             log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
