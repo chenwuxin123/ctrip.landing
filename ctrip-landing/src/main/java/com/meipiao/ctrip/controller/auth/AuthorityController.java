@@ -1,15 +1,13 @@
 package com.meipiao.ctrip.controller.auth;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.meipiao.ctrip.constant.TokenConstant;
+import com.meipiao.ctrip.constant.RedisKeyConstant;
 import com.meipiao.ctrip.utils.HttpClientUtil;
 import com.meipiao.ctrip.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,9 +43,9 @@ public class AuthorityController {
     @Resource
     RedisUtil redisUtil;
 
-    private final String tokenKey = TokenConstant.TOKENKEY; //过期key
+    private final String tokenKey = RedisKeyConstant.TOKEN_KEY; //过期key
 
-    private final String persistenceTokenKey = TokenConstant.PERSISTENCETOKENKEY; //持久化key
+    private final String persistenceTokenKey = RedisKeyConstant.PERSISTENCE_TOKEN_KEY; //持久化key
 
     private ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 

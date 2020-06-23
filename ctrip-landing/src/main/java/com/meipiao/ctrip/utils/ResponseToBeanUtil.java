@@ -12,8 +12,6 @@ import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
 import com.meipiao.ctrip.entity.response.rate.PriceDetail;
 import com.meipiao.ctrip.entity.response.room.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +38,12 @@ public class ResponseToBeanUtil {
         return responseStatus.getString("Ack");
     }
 
+    public static String getResponseTimestamp(String result){
+        JSONObject obj = JSONObject.parseObject(result);
+        //获取时间戳
+        JSONObject responseStatus = JSONObject.parseObject(obj.getString("ResponseStatus"));
+        return responseStatus.getString("Timestamp");
+    }
 
     public static String getLastRecordID(String result) {
         JSONObject obj = JSONObject.parseObject(result);
@@ -502,12 +506,15 @@ public class ResponseToBeanUtil {
     }
 
     //价格增量
-    public static List<String> getIncrementPriceBean(String result){
+    public static List<String> getIncrementPriceBean(String result) {
         ArrayList<String> list = new ArrayList<>();
         JSONArray changeInfos = JSONObject.parseObject(result).getJSONArray("ChangeInfos");
+        if(changeInfos == null ){
+            return list;
+        }
         for (Object changeInfo : changeInfos) {
             JSONObject changeBean = JSONObject.parseObject(changeInfo.toString());
-            String hotelId = changeBean.getString("1938480");
+            String hotelId = changeBean.getString("HotelID");
             list.add(hotelId);
         }
         return list;

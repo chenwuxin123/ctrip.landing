@@ -7,8 +7,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,9 +27,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequestMapping("/task")
 @Api(value = "Asynchronous Thread Task", tags = {"多线程异步拉取数据"})
 public class AsyncThreadController {
-
-    @Resource
-    MongoTemplate mongoTemplate;
 
     @Resource
     MongoAggregationUtil mongoAggregationUtil;
@@ -150,5 +146,18 @@ public class AsyncThreadController {
         executorService.shutdown();
     }
 
+    @GetMapping("/increment/price")
+    @ApiOperation(value = "携程增量异步拉取")
+    public void asyncIncrementPrice(){
+        //创建线程池
+        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
 
+    }
+
+    @Async
+    public void test(String startTime) throws InterruptedException {
+        System.out.println(Thread.currentThread().getName() + "接收到的参数:"+ startTime);
+        Thread.sleep(2000);//模拟执行任务的时间
+        System.out.println(Thread.currentThread().getName() + "执行完毕");
+    }
 }

@@ -1,9 +1,11 @@
 package com.meipiao.ctrip.controller.task;
 
 import com.meipiao.ctrip.constant.RabbitConstant;
+import com.meipiao.ctrip.constant.RedisKeyConstant;
 import com.meipiao.ctrip.controller.api.StaticDataController;
 import com.meipiao.ctrip.entity.mq.MQParams;
 import com.meipiao.ctrip.utils.MongoAggregationUtil;
+import com.meipiao.ctrip.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -39,6 +41,11 @@ public class RabbitMQSenderController {
 
     @Resource
     MongoAggregationUtil mongoAggregationUtil;
+
+    @Resource
+    RedisUtil redisUtil;
+
+    private final String crtipIncreStartTimeKey = RedisKeyConstant.INCREMENT_START_TIME_KEY;
 
     @GetMapping("/direct/rate")
     @ApiOperation(value = "发送`直连价格`MQ")
@@ -77,7 +84,40 @@ public class RabbitMQSenderController {
 
     @GetMapping("/increment/price")
     @ApiOperation(value = "发送`价格增量`MQ")
-    public void sendIncrementPrice(){
-        String startTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
+    public void sendIncrementPrice() {
+        String startTime = "";
+        String nextTime = "";
+        boolean hasKey = redisUtil.hasKey(crtipIncreStartTimeKey);
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        int count = 0;
+        long start = System.currentTimeMillis() / 1000;
+        log.info("Ctrip Increment price channel starting...");
+        while (true) {
+            if (hasKey) {
+                startTime = redisUtil.get(crtipIncreStartTimeKey).toString();
+                //发送MQ
+                rabbitTemplate.convertAndSend(RabbitConstant.INCREMENT_PRICE_EXCHANGE, RabbitConstant.INCREMENT_PRICE_ROUTINGKEY, startTime);
+                //更新缓存时间 +1s
+                LocalDateTime plusSecond = LocalDateTime.parse(startTime, df).plusSeconds(1L);
+                nextTime = df.format(plusSecond);
+                redisUtil.set(crtipIncreStartTimeKey, nextTime);
+                count++;
+                while (System.currentTimeMillis() / 1000 - start > 30) {
+                    log.info("过去半分钟共入队{}条数据", count);
+                    start = System.currentTimeMillis();
+                }
+            } else {
+                //获取当前时间
+                LocalDateTime time = LocalDateTime.now().minusSeconds(30L);//向后推迟30s
+                startTime = df.format(time);
+                //发送MQ
+                rabbitTemplate.convertAndSend(RabbitConstant.INCREMENT_PRICE_EXCHANGE, RabbitConstant.INCREMENT_PRICE_ROUTINGKEY, startTime);
+                //进缓存的时间 +1s
+                nextTime = df.format(time.plusSeconds(1L));
+                redisUtil.set(crtipIncreStartTimeKey, nextTime);
+                hasKey = true;
+                count++;
+            }
+        }
     }
 }
