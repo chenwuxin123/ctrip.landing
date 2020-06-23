@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -30,15 +31,13 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/task")
-@Api(value = "Direct Price RabbitMQ Task Start", tags = {"开启RabbitMQ`直连价格`队列"})
-public class DirectRateSenderController {
-    @Autowired
-    StaticDataController staticDataController;//消息接收者(处理)
+@Api(value = "RabbitMQ Task Start", tags = {"开启RabbitMQ队列"})
+public class RabbitMQSenderController {
 
-    @Autowired
+    @Resource
     RabbitTemplate rabbitTemplate;
 
-    @Autowired
+    @Resource
     MongoAggregationUtil mongoAggregationUtil;
 
     @GetMapping("/direct/rate")
@@ -74,5 +73,11 @@ public class DirectRateSenderController {
             params.setCreatTime(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
             rabbitTemplate.convertAndSend(RabbitConstant.ROOM_STATIC_EXCHANGE, RabbitConstant.ROOM_STATIC_ROUTINGKEY, params);
         }
+    }
+
+    @GetMapping("/increment/price")
+    @ApiOperation(value = "发送`价格增量`MQ")
+    public void sendIncrementPrice(){
+        String startTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
     }
 }

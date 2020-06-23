@@ -181,7 +181,7 @@ public class RequestBeanToJson {
         //PagingSettings
         PagingSettings pagingSettings = new PagingSettings();
         pagingSettings.setLastRecordID(lastRecordID);//酒店ID
-        pagingSettings.setPageSize(pageSize);//分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
+        pagingSettings.setPageSize(pageSize);//每页最多返回几条记录
         getPriceEntityReq.setPagingSettings(pagingSettings);
 
         //Settings
@@ -193,7 +193,7 @@ public class RequestBeanToJson {
         //SearchCandidate
         IncrPriceSearchCandidate incrPriceSearchCandidate = new IncrPriceSearchCandidate();
         incrPriceSearchCandidate.setStartTime(startTime);
-        incrPriceSearchCandidate.setDuration(0);
+        incrPriceSearchCandidate.setDuration(1);
         getPriceEntityReq.setSearchCandidate(incrPriceSearchCandidate);
 
         return JSON.toJSONString(getPriceEntityReq);

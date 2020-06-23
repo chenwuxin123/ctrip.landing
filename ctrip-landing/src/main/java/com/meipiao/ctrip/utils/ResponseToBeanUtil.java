@@ -12,6 +12,8 @@ import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
 import com.meipiao.ctrip.entity.response.rate.PriceDetail;
 import com.meipiao.ctrip.entity.response.room.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +25,12 @@ import java.util.List;
  */
 public class ResponseToBeanUtil {
     public static void main(String[] args) {
-        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-22T11:10:36.423+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]}}";
-        String lastRecordID = getLastRecordID(result);
-        System.out.println(lastRecordID);
+        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-23T08:55:12.373+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"PagingInfo\":{\"LastRecordID\":\"1592873712$20\"},\"ChangeInfos\":[{\"ChangeDetail\":[{\"Name\":\"RoomStatus\"},{\"Name\":\"GuaranteeType\"}],\"HotelID\":\"1938480\",\"RoomID\":\"707817282\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"876651\",\"RoomID\":\"708098122\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"6865949\",\"RoomID\":\"708136149\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"2302901\",\"RoomID\":\"708163659\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"1614998\",\"RoomID\":\"710005175\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"21788608\",\"RoomID\":\"713639134\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"PrepayLCT\"}],\"HotelID\":\"425157\",\"RoomID\":\"736745164\",\"EffectDate\":\"2020-10-24\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"1800540\",\"RoomID\":\"738230104\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"1782550\",\"RoomID\":\"786418465\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"},{\"Name\":\"Price\"}],\"HotelID\":\"735707\",\"RoomID\":\"833747923\",\"EffectDate\":\"2020-07-09\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"4727470\",\"RoomID\":\"835343995\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"GuaranteeLCT\"}],\"HotelID\":\"430273\",\"RoomID\":\"853305120\",\"EffectDate\":\"2020-11-29\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"GuaranteeLCT\"}],\"HotelID\":\"430273\",\"RoomID\":\"853305125\",\"EffectDate\":\"2020-11-29\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"GuaranteeLCT\"}],\"HotelID\":\"14952494\",\"RoomID\":\"853307535\",\"EffectDate\":\"2020-11-29\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"},{\"Name\":\"Price\"},{\"Name\":\"Meal\"}],\"HotelID\":\"374875\",\"RoomID\":\"864833810\",\"EffectDate\":\"2020-06-27\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"},{\"Name\":\"Price\"}],\"HotelID\":\"5674198\",\"RoomID\":\"866892401\",\"EffectDate\":\"2020-06-25\",\"ChangeTime\":\"2020-06-23T08:55:12.000+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"6862466\",\"RoomID\":\"708119430\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.001+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"910981\",\"RoomID\":\"708119474\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.001+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"23931916\",\"RoomID\":\"708157649\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.001+08:00\",\"DurationOfStay\":0},{\"ChangeDetail\":[{\"Name\":\"Cost\"}],\"HotelID\":\"50260203\",\"RoomID\":\"710180058\",\"EffectDate\":\"2020-08-25\",\"ChangeTime\":\"2020-06-23T08:55:12.001+08:00\",\"DurationOfStay\":0}]}\n";
+
+        List<String> incrementPriceBean = getIncrementPriceBean(result);
+        for (String s : incrementPriceBean) {
+            System.out.println(s);
+        }
     }
 
     public static String getResponseStatus(String result) {
@@ -496,4 +501,15 @@ public class ResponseToBeanUtil {
         return cancelList;
     }
 
+    //价格增量
+    public static List<String> getIncrementPriceBean(String result){
+        ArrayList<String> list = new ArrayList<>();
+        JSONArray changeInfos = JSONObject.parseObject(result).getJSONArray("ChangeInfos");
+        for (Object changeInfo : changeInfos) {
+            JSONObject changeBean = JSONObject.parseObject(changeInfo.toString());
+            String hotelId = changeBean.getString("1938480");
+            list.add(hotelId);
+        }
+        return list;
+    }
 }

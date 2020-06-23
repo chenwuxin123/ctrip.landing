@@ -17,7 +17,6 @@ import com.mongodb.BasicDBObject;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -337,7 +336,7 @@ public class StaticDataController {
     @GetMapping("/change/price")
     @ApiOperation(value = "监测房价、房量、房态增量变化接口")
     public void changePrice() throws InterruptedException {
-        int PageSize = 1000;//每页最多返回几条记录
+        int PageSize = 20;//每页最多返回几条记录
         Map map = putParam();
         map.put("ICODE", roomIncrementICODE);
         String UUID = java.util.UUID.randomUUID().toString();
@@ -348,8 +347,7 @@ public class StaticDataController {
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
             //请求json
-//            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
-            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, "2018-01-05T15:00:00.000+08:00");
+            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
             log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
