@@ -10,6 +10,7 @@ import org.springframework.amqp.rabbit.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 
 /**
@@ -20,16 +21,17 @@ import java.io.IOException;
  */
 //直连价格监听
 @Slf4j
-@Component
-@RabbitListener(bindings = @QueueBinding(
-        value = @Queue(RabbitConstant.DIRECT_RATE_QUEUE),
-        exchange = @Exchange(RabbitConstant.DIRECT_RATE_EXCHANGE),
-        key = {RabbitConstant.DIRECT_RATE_ROUTINGKEY}
-))
+//@Component
+//@RabbitListener(bindings = @QueueBinding(
+//        value = @Queue(RabbitConstant.DIRECT_RATE_QUEUE),
+//        exchange = @Exchange(RabbitConstant.DIRECT_RATE_EXCHANGE),
+//        key = {RabbitConstant.DIRECT_RATE_ROUTINGKEY}
+//))
 public class DirectRateMonitor {
 
-    @Autowired
+    @Resource
     StaticDataController staticDataController;
+
 
     @RabbitHandler
     public void processDirectRate(MQParams params, Message message, Channel channel) throws IOException {
@@ -40,7 +42,7 @@ public class DirectRateMonitor {
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {
             //异常处理
-            System.out.println("处理失败的id为" + params.getHotelId());
+            log.error("处理失败的id为:{},异常信息:{}----->如果异常信息为null(空指针异常),则不作处理",params.getHotelId(),e.getMessage());
             //deliveryTag:该消息的index multiple：是否批量.true:将一次性拒绝所有小于deliveryTag的消息 requeue：被拒绝的是否重新入队列 注意：如果设置为true ，则会添加在队列的末端
             channel.basicNack(deliveryTag, false, false);
         }

@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +47,9 @@ public class AsyncThreadController {
 
     @Resource(name = "taskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;//线程池
+
+    @Value("${time.interval}")
+    private Long timeInterval;
 
     @GetMapping("/static/hotel")
     @ApiOperation(value = "酒店静态信息异步拉取")
@@ -186,31 +190,27 @@ public class AsyncThreadController {
             taskExecutor.submit(() -> {
                 try {
                     Future future = staticDataController.changePrice(findTime);
+
                     //获取返回值
                     Object getTimeStamp = future.get();
                     long resultTimeStamp = Long.parseLong(String.valueOf(getTimeStamp));
                 } catch (InterruptedException | ExecutionException e) {
                     log.error("{}时间段拉取增量发生异常，异常原因:{}", findTime, e.getMessage());
-                    //记录时间段，人工处理
+                    //记录时间段，进行处理
                 }
             });
-
-            Thread.sleep(800);//延迟0.8s
             //更新缓存时间 +1s
-            LocalDateTime plusSecond = LocalDateTime.parse(startTime, df).plusSeconds(1L);
+            LocalDateTime plusSecond = LocalDateTime.parse(findTime, df).plusSeconds(1L);
             nextTime = df.format(plusSecond);
             redisUtil.set(crtipIncreStartTimeKey, nextTime);
+            Thread.sleep(timeInterval);//延迟0.8s
             count++;
             while (System.currentTimeMillis() / 1000 - start > 60) {
-                log.info("过去每分钟共消费{}条数据", count);
+                log.info("过去一分钟共发送{}条增量查询请求", count);
                 count = 0;
-                //获取返回的时间戳
-
-
+                //获取返回的时间戳resultTimeStamp 进行校验
                 start = System.currentTimeMillis();
             }
         }
-
     }
-
 }

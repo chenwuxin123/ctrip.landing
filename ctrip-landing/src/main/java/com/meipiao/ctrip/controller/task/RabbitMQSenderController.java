@@ -127,8 +127,8 @@ public class RabbitMQSenderController {
             if (!redisUtil.hasKey(RedisKeyConstant.INCREMENT_HOTELIDS_KEY)) {
                 redisUtil.hset(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, "test", "test");
             }
-            boolean hasKey = redisUtil.hHasKey(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);
-            if (!hasKey) {
+            boolean hasHotelId = redisUtil.hHasKey(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);
+            if (!hasHotelId) {
                 //如果不存在 先存在发
                 creatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
                 redisUtil.hset(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId, enterTime);
@@ -137,7 +137,7 @@ public class RabbitMQSenderController {
                 //如果存在 获取上一次的时间戳
                 Object getTimeStamp = redisUtil.hget(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);
                 long lastTimeStamp = Long.parseLong(String.valueOf(getTimeStamp));
-                if (enterTime - lastTimeStamp > 5) {
+                if (enterTime - lastTimeStamp > 5000) {
                     //间隔大于5s 先改在发
                     creatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
                     redisUtil.hdel(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);

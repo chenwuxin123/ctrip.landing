@@ -8,7 +8,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -60,7 +59,7 @@ public class HttpClientUtil {
                     response.close();
                 }
             } catch (IOException e) {
-                log.error("{}中响应异常:", HttpClientUtil.class.getName(), e.getMessage());
+                log.error("{}中响应异常:{}", HttpClientUtil.class.getName(), e.getMessage());
             }
         }
 
@@ -79,7 +78,6 @@ public class HttpClientUtil {
             if (params != null) {
                 url = url + "?" + urlencode(params);
             }
-            log.info("请求的地址:{}", url);
             // 创建Http Post请求
             HttpPost httpPost = new HttpPost(url);
             // 创建请求内容
@@ -92,9 +90,11 @@ public class HttpClientUtil {
             log.error("{}方法中http请求发生异常:{}", HttpClientUtil.class.getName(), e.getMessage());
         } finally {
             try {
-                response.close();
+                if (response != null) {
+                    response.close();
+                }
             } catch (IOException e) {
-                log.error("{}中响应异常:", HttpClientUtil.class.getName(), e.getMessage());
+                log.error("{}中响应异常:{}", HttpClientUtil.class.getName(), e.getMessage());
             }
         }
         return resultString;
@@ -105,7 +105,7 @@ public class HttpClientUtil {
         StringBuilder sb = new StringBuilder();
         for (Map.Entry i : data.entrySet()) {
             try {
-                sb.append(i.getKey()).append("=").append(URLEncoder.encode(i.getValue() + "", "UTF-8")).append("&");
+                sb.append(i.getKey()).append("=").append(URLEncoder.encode(i.getValue() + "", DEF_CHATSET)).append("&");
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }

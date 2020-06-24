@@ -30,18 +30,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 
@@ -171,7 +163,6 @@ public class StaticDataController {
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
             String json = RequestBeanToJson.getCityEntityReq(PageSize, LastRecordID);
-            log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
@@ -220,7 +211,6 @@ public class StaticDataController {
                 String accessToken = getAccessToken(UUID);
                 map.put("Token", accessToken);
                 String json = RequestBeanToJson.getCityHotelIdReq(cityID, PageSize, LastRecordID);
-                log.info("请求的json:{}", json);
                 String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
@@ -253,7 +243,6 @@ public class StaticDataController {
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
             String json = RequestBeanToJson.getHotelStaticReq(HotelID);
-            log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
@@ -287,13 +276,12 @@ public class StaticDataController {
             String accessToken = getAccessToken(UUID);
             map.put("Token", accessToken);
             String json = RequestBeanToJson.getRoomStaticReq(hotelId, PageSize, LastRecordID);
-            log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
                 log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
-                return;
+                break;
             }
             //获取实体集合，添加至mongodb
             List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, hotelId);
@@ -308,12 +296,11 @@ public class StaticDataController {
     /*
         @GetMapping("/query/rate")
         @ApiOperation(value = "直连查询")
-
      */
     @Async
     @AccessLimit(perSecond = 100, timeOut = 100000)
     public void queryRate(String hotelId, String start, String end) throws InterruptedException {
-        int PageSize = 200;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
+        int PageSize = 20;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
         Map map = putParam();
         map.put("ICODE", rateDirect);
         String UUID = java.util.UUID.randomUUID().toString();
@@ -329,7 +316,6 @@ public class StaticDataController {
              * end:   定义如何输入
              */
             String json = RequestBeanToJson.getRateEntityReq(hotelId, LastRecordID, PageSize, start, end);
-            log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
@@ -341,22 +327,30 @@ public class StaticDataController {
             List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, hotelId);
             List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, hotelId);
             List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, hotelId);
-            mongodbService.updatePriceDetail(priceDetailBean);
-            mongodbService.updatePolicyDetail(policyDetailBean);
-            mongodbService.updateCancelDetail(cancelDetailBean);
+
+            if (priceDetailBean.size() != 0) {
+                mongodbService.updatePriceDetail(priceDetailBean);
+            }
+            if (policyDetailBean.size() != 0) {
+                mongodbService.updatePolicyDetail(policyDetailBean);
+            }
+            if (cancelDetailBean.size() != 0) {
+                mongodbService.updateCancelDetail(cancelDetailBean);
+            }
             LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
         } while (!"".equals(LastRecordID));
     }
 
-
     /*
         @GetMapping("/change/price")
         @ApiOperation(value = "监测房价、房量、房态增量变化接口")
+        单次测试：获取1s内增量数据放入MQ花费6-8s 一个去重500+家酒店
     */
     @Async
     @AccessLimit(perSecond = 16, timeOut = 100000)
     public Future changePrice(String startTime) throws InterruptedException {
-        int PageSize = 20;//每页最多返回几条记录
+        long s = System.currentTimeMillis() / 1000;
+        int PageSize = 1000;//每页最多返回几条记录
         Map map = putParam();
         map.put("ICODE", roomIncrementICODE);
         String UUID = java.util.UUID.randomUUID().toString();
@@ -368,7 +362,6 @@ public class StaticDataController {
             map.put("Token", accessToken);
             //请求json
             String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, startTime);
-            log.info("请求的json:{}", json);
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             threadLocal.set(HttpClientUtil.doPostJson(serverHost, map, json));
             String ack = ResponseToBeanUtil.getResponseStatus(threadLocal.get().toString());
@@ -379,9 +372,12 @@ public class StaticDataController {
             }
             //获取到HotelId集合,进行下一步去重,发送至mq
             List<String> hotelIds = ResponseToBeanUtil.getIncrementPriceBean(threadLocal.get().toString());
-            rabbitMQSenderController.sendIncrementPrice(hotelIds);
+            if (hotelIds.size() != 0) {
+                rabbitMQSenderController.sendIncrementPrice(hotelIds);
+            }
             LastRecordID = ResponseToBeanUtil.getLastRecordID(threadLocal.get().toString());
         } while (!"".equals(LastRecordID));
+        log.info("每秒增量入队时间花费共{}s：", (System.currentTimeMillis() / 1000 - s));
         return new AsyncResult(timestamp);
     }
 
