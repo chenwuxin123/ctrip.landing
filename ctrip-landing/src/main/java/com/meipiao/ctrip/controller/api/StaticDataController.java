@@ -1,8 +1,10 @@
 package com.meipiao.ctrip.controller.api;
 
 import com.alibaba.fastjson.JSONObject;
+import com.meipiao.ctrip.annotation.AccessLimit;
 import com.meipiao.ctrip.constant.RedisKeyConstant;
 import com.meipiao.ctrip.controller.auth.AuthorityController;
+import com.meipiao.ctrip.controller.task.RabbitMQSenderController;
 import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
@@ -28,12 +30,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 
@@ -50,6 +58,9 @@ public class StaticDataController {
 
     @Resource
     AuthorityController authorityController;
+
+    @Resource
+    RabbitMQSenderController rabbitMQSenderController;
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -93,8 +104,7 @@ public class StaticDataController {
     @Value("${UniqueID}")          //UniqueID
     private String UniqueID;
 
-    private final String tokenKey = RedisKeyConstant.TOKEN_KEY; //有效token对应的key
-
+    private static ThreadLocal threadLocal = new ThreadLocal<>();
 
     private Map putParam() {
         ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
@@ -122,7 +132,7 @@ public class StaticDataController {
     private String getAccessToken(String UUID) throws InterruptedException {
         String access_token = null;
         //获取Access Token
-        Map<Object, Object> tokenMap = redisUtil.hmget(tokenKey);
+        Map<Object, Object> tokenMap = redisUtil.hmget(RedisKeyConstant.TOKEN_KEY);
         if (tokenMap.size() > 0) {
             for (Object token : tokenMap.keySet()) {
                 access_token = token.toString();
@@ -147,6 +157,7 @@ public class StaticDataController {
           PageSize: 每页记录数，最大限制5000
           LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
+    @AccessLimit(perSecond = 3, timeOut = 100000)
     public void City() throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
         int PageSize = 5000;
@@ -183,6 +194,7 @@ public class StaticDataController {
          PageSize: 每页记录数，最大限制5000
          LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
+    @AccessLimit(perSecond = 3, timeOut = 100000)
     public void getHotelID() throws InterruptedException {
         /*
             获取mongodb中所有CityID 进行遍历查询HotelId
@@ -299,6 +311,7 @@ public class StaticDataController {
 
      */
     @Async
+    @AccessLimit(perSecond = 100, timeOut = 100000)
     public void queryRate(String hotelId, String start, String end) throws InterruptedException {
         int PageSize = 200;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
         Map map = putParam();
@@ -335,11 +348,13 @@ public class StaticDataController {
         } while (!"".equals(LastRecordID));
     }
 
+
     /*
         @GetMapping("/change/price")
         @ApiOperation(value = "监测房价、房量、房态增量变化接口")
     */
     @Async
+    @AccessLimit(perSecond = 16, timeOut = 100000)
     public Future changePrice(String startTime) throws InterruptedException {
         int PageSize = 20;//每页最多返回几条记录
         Map map = putParam();
@@ -347,25 +362,26 @@ public class StaticDataController {
         String UUID = java.util.UUID.randomUUID().toString();
         String timestamp;
         String LastRecordID = "";
-//        do {
-        //获得Access Token
-        String accessToken = getAccessToken(UUID);
-        map.put("Token", accessToken);
-        //请求json
-        String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, startTime);
-        log.info("请求的json:{}", json);
-        String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
-        String result = HttpClientUtil.doPostJson(serverHost, map, json);
-        String ack = ResponseToBeanUtil.getResponseStatus(result);
-        timestamp = ResponseToBeanUtil.getResponseTimestamp(result);
-        if (!"Success".equals(ack)) {
-            log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
-//                break;
-        }
-        //获取到HotelId集合,进行下一步去重
-        List<String> hotelId = ResponseToBeanUtil.getIncrementPriceBean(result);
-//            LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
-//        } while (!"".equals(LastRecordID));
+        do {
+            //获得Access Token
+            String accessToken = getAccessToken(UUID);
+            map.put("Token", accessToken);
+            //请求json
+            String json = RequestBeanToJson.getIncrPriceEntityReq(LastRecordID, PageSize, startTime);
+            log.info("请求的json:{}", json);
+            String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+            threadLocal.set(HttpClientUtil.doPostJson(serverHost, map, json));
+            String ack = ResponseToBeanUtil.getResponseStatus(threadLocal.get().toString());
+            timestamp = ResponseToBeanUtil.getResponseTimestamp(threadLocal.get().toString());
+            if (!"Success".equals(ack)) {
+                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), threadLocal.get().toString());
+                break;
+            }
+            //获取到HotelId集合,进行下一步去重,发送至mq
+            List<String> hotelIds = ResponseToBeanUtil.getIncrementPriceBean(threadLocal.get().toString());
+            rabbitMQSenderController.sendIncrementPrice(hotelIds);
+            LastRecordID = ResponseToBeanUtil.getLastRecordID(threadLocal.get().toString());
+        } while (!"".equals(LastRecordID));
         return new AsyncResult(timestamp);
     }
 
