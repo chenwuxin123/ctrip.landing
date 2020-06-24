@@ -1,21 +1,28 @@
 package com.meipiao.ctrip.controller;
 
+import com.google.common.collect.Sets;
+import com.meipiao.ctrip.constant.RedisKeyConstant;
 import com.meipiao.ctrip.controller.api.StaticDataController;
 import com.meipiao.ctrip.utils.MongoAggregationUtil;
+import com.meipiao.ctrip.utils.RedisUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -24,7 +31,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Slf4j
 @RestController
-@RequestMapping("/task")
+@RequestMapping("/async")
 @Api(value = "Asynchronous Thread Task", tags = {"多线程异步拉取数据"})
 public class AsyncThreadController {
 
@@ -34,7 +41,13 @@ public class AsyncThreadController {
     @Resource
     StaticDataController staticDataController;
 
-    @GetMapping("/async/static/hotel")
+    @Resource
+    RedisUtil redisUtil;
+
+    @Resource(name = "taskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;//线程池
+
+    @GetMapping("/static/hotel")
     @ApiOperation(value = "酒店静态信息异步拉取")
     @ApiImplicitParam(value = "线程数", required = true)
     public void asyncStaticHotel(int threadCount) {
@@ -72,7 +85,7 @@ public class AsyncThreadController {
         executorService.shutdown();// 关闭线程池
     }
 
-    @GetMapping("/async/static/room")
+    @GetMapping("/static/room")
     @Deprecated
     @ApiOperation(value = "房型静态信息异步拉取")
     @ApiImplicitParam(value = "线程数", required = true)
@@ -107,7 +120,7 @@ public class AsyncThreadController {
         executorService.shutdown();
     }
 
-    @GetMapping("/async/rate")
+    @GetMapping("/rate")
     @Deprecated
     @ApiOperation(value = "报价实时查询接口异步拉取")
     @ApiImplicitParams({
@@ -146,18 +159,58 @@ public class AsyncThreadController {
         executorService.shutdown();
     }
 
+
     @GetMapping("/increment/price")
     @ApiOperation(value = "携程增量异步拉取")
-    public void asyncIncrementPrice(){
-        //创建线程池
-        ThreadPoolExecutor executorService = (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
+    @SuppressWarnings("InfiniteLoopStatement")
+    public void asyncIncrementPrice() throws InterruptedException {
+        String startTime = "";
+        String nextTime = "";
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        int count = 0;
+        long start = System.currentTimeMillis() / 1000;
+
+        //判断是否存在start time key
+        String crtipIncreStartTimeKey = RedisKeyConstant.INCREMENT_START_TIME_KEY;
+        if (!redisUtil.hasKey(crtipIncreStartTimeKey)) {
+            //获取当前时间 向后推迟30s
+            LocalDateTime time = LocalDateTime.now().minusSeconds(30L);
+            startTime = df.format(time);
+            redisUtil.set(crtipIncreStartTimeKey, startTime);
+        }
+        log.info("Ctrip Increment price channel starting...");
+        while (true) {
+            startTime = redisUtil.get(crtipIncreStartTimeKey).toString();
+            //执行异步任务
+            String findTime = startTime;
+            taskExecutor.submit(() -> {
+                try {
+                    Future future = staticDataController.changePrice(findTime);
+                    //获取返回值
+                    Object getTimeStamp = future.get();
+                    long resultTimeStamp = Long.parseLong(String.valueOf(getTimeStamp));
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("{}时间段拉取增量发生异常，异常原因:{}", findTime, e.getMessage());
+                    //记录时间段，人工处理
+                }
+            });
+
+            Thread.sleep(800);//延迟0.8s
+            //更新缓存时间 +1s
+            LocalDateTime plusSecond = LocalDateTime.parse(startTime, df).plusSeconds(1L);
+            nextTime = df.format(plusSecond);
+            redisUtil.set(crtipIncreStartTimeKey, nextTime);
+            count++;
+            while (System.currentTimeMillis() / 1000 - start > 60) {
+                log.info("过去每分钟共消费{}条数据", count);
+                count = 0;
+                //获取返回的时间戳
+
+
+                start = System.currentTimeMillis();
+            }
+        }
 
     }
 
-    @Async
-    public void test(String startTime) throws InterruptedException {
-        System.out.println(Thread.currentThread().getName() + "接收到的参数:"+ startTime);
-        Thread.sleep(2000);//模拟执行任务的时间
-        System.out.println(Thread.currentThread().getName() + "执行完毕");
-    }
 }

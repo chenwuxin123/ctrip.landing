@@ -2,7 +2,6 @@ package com.meipiao.ctrip.controller.task;
 
 import com.meipiao.ctrip.constant.RabbitConstant;
 import com.meipiao.ctrip.constant.RedisKeyConstant;
-import com.meipiao.ctrip.controller.api.StaticDataController;
 import com.meipiao.ctrip.entity.mq.MQParams;
 import com.meipiao.ctrip.utils.MongoAggregationUtil;
 import com.meipiao.ctrip.utils.RedisUtil;
@@ -11,8 +10,9 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.LifecycleState;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,7 +21,10 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -45,10 +48,8 @@ public class RabbitMQSenderController {
     @Resource
     RedisUtil redisUtil;
 
-    private final String crtipIncreStartTimeKey = RedisKeyConstant.INCREMENT_START_TIME_KEY;
-
     @GetMapping("/direct/rate")
-    @ApiOperation(value = "发送`直连价格`MQ")
+    @ApiOperation(value = "全量发送`直连价格`MQ")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "start", value = "入住日期", required = true),
             @ApiImplicitParam(name = "end", value = "离店日期", required = true)
@@ -56,8 +57,8 @@ public class RabbitMQSenderController {
     public void sendDirectRate(String start, String end) {
         //从mongodb中查询酒店id
         ArrayList<String> list = mongoAggregationUtil.findAllHotelId("HotelId");
+        MQParams params = new MQParams();
         for (String hotelId : list) {
-            MQParams params = new MQParams();
             params.setHotelId(hotelId);
             params.setStart(start);
             params.setEnd(end);
@@ -68,12 +69,30 @@ public class RabbitMQSenderController {
         }
     }
 
+    @GetMapping("/direct/single/rate/")
+    @ApiOperation(value = "发送某个酒店`直连价格`MQ")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "hotelId", value = "酒店id", required = true),
+            @ApiImplicitParam(name = "start", value = "入住日期", required = true),
+            @ApiImplicitParam(name = "end", value = "离店日期", required = true)
+    })
+    public void sendDirectRate(String hotelId, String start, String end) {
+        MQParams params = new MQParams();
+        params.setHotelId(hotelId);
+        params.setStart(start);
+        params.setEnd(end);
+        params.setExpiration(4000 * 1000);//过期时间
+        params.setMessageId("Task_" + hotelId + UUID.randomUUID().toString().replace("-", ""));
+        params.setCreatTime(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now()));
+        rabbitTemplate.convertAndSend(RabbitConstant.DIRECT_RATE_EXCHANGE, RabbitConstant.DIRECT_RATE_ROUTINGKEY, params);
+    }
+
     @GetMapping("/room/static")
-    @ApiOperation(value = "发送`静态房型`MQ")
+    @ApiOperation(value = "全量发送`静态房型`MQ")
     public void sendRoomStatic() {
         ArrayList<String> list = mongoAggregationUtil.findAllHotelId("HotelId");
+        MQParams params = new MQParams();
         for (String hotelId : list) {
-            MQParams params = new MQParams();
             params.setHotelId(hotelId);
             params.setExpiration(4000 * 1000);//过期时间
             params.setMessageId("Task_" + hotelId + UUID.randomUUID().toString().replace("-", ""));
@@ -82,41 +101,49 @@ public class RabbitMQSenderController {
         }
     }
 
-    @GetMapping("/increment/price")
-    @ApiOperation(value = "发送`价格增量`MQ")
-    public void sendIncrementPrice() {
-        String startTime = "";
-        String nextTime = "";
-        boolean hasKey = redisUtil.hasKey(crtipIncreStartTimeKey);
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        int count = 0;
-        long start = System.currentTimeMillis() / 1000;
-        log.info("Ctrip Increment price channel starting...");
-        while (true) {
-            if (hasKey) {
-                startTime = redisUtil.get(crtipIncreStartTimeKey).toString();
-                //发送MQ
-                rabbitTemplate.convertAndSend(RabbitConstant.INCREMENT_PRICE_EXCHANGE, RabbitConstant.INCREMENT_PRICE_ROUTINGKEY, startTime);
-                //更新缓存时间 +1s
-                LocalDateTime plusSecond = LocalDateTime.parse(startTime, df).plusSeconds(1L);
-                nextTime = df.format(plusSecond);
-                redisUtil.set(crtipIncreStartTimeKey, nextTime);
-                count++;
-                while (System.currentTimeMillis() / 1000 - start > 30) {
-                    log.info("过去半分钟共入队{}条数据", count);
-                    start = System.currentTimeMillis();
-                }
+    /**
+     * 将得到的HotelIds进行过滤(1.传递的参数去重 2.未使用的抛弃 3.5S内查询过的抛弃)
+     * 将过滤后的HotelIds逐个发送至队列，进行全量拉取
+     * 已发送的HotelId
+     * redis 为hash类型 key-hotelId-timeStamp
+     */
+    private static AtomicLong uniqueseed = new AtomicLong(System.currentTimeMillis() / 1000);
+
+    public void sendIncrementPrice(List<String> hotelIds) {
+        long enterTime = uniqueseed.incrementAndGet();//进入redis的时间
+        /*
+              1.传递的参数去重
+         */
+        LinkedHashSet<String> hashSet = new LinkedHashSet<>(hotelIds);
+        /*
+               2.未使用的抛弃 (连接中心库进行过滤)
+               .....
+         */
+        String creatTime;
+        for (String hotelId : hashSet) {
+            /*
+                    3.5S内查询过的抛弃
+             */
+            if (!redisUtil.hasKey(RedisKeyConstant.INCREMENT_HOTELIDS_KEY)) {
+                redisUtil.hset(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, "test", "test");
+            }
+            boolean hasKey = redisUtil.hHasKey(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);
+            if (!hasKey) {
+                //如果不存在 先存在发
+                creatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
+                redisUtil.hset(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId, enterTime);
+                sendDirectRate(hotelId, creatTime, creatTime);
             } else {
-                //获取当前时间
-                LocalDateTime time = LocalDateTime.now().minusSeconds(30L);//向后推迟30s
-                startTime = df.format(time);
-                //发送MQ
-                rabbitTemplate.convertAndSend(RabbitConstant.INCREMENT_PRICE_EXCHANGE, RabbitConstant.INCREMENT_PRICE_ROUTINGKEY, startTime);
-                //进缓存的时间 +1s
-                nextTime = df.format(time.plusSeconds(1L));
-                redisUtil.set(crtipIncreStartTimeKey, nextTime);
-                hasKey = true;
-                count++;
+                //如果存在 获取上一次的时间戳
+                Object getTimeStamp = redisUtil.hget(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);
+                long lastTimeStamp = Long.parseLong(String.valueOf(getTimeStamp));
+                if (enterTime - lastTimeStamp > 5) {
+                    //间隔大于5s 先改在发
+                    creatTime = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").format(LocalDateTime.now());
+                    redisUtil.hdel(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId);
+                    redisUtil.hset(RedisKeyConstant.INCREMENT_HOTELIDS_KEY, hotelId, enterTime);
+                    sendDirectRate(hotelId, creatTime, creatTime);
+                }
             }
         }
     }
