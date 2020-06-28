@@ -23,11 +23,11 @@ public class ThreadPoolTaskConfig {
     /**
      * 允许线程空闲时间（单位：默认为秒）
      */
-    private static final int keepAliveTime = 10;
+    private static final int keepAliveTime = 30;
     /**
      * 缓冲队列大小
      */
-    private static final int queueCapacity = 200;
+    private static final int queueCapacity = 2000;
 
     /**
      * 线程池名前缀
