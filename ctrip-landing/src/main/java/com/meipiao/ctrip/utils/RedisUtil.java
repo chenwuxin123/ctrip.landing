@@ -581,7 +581,10 @@ public class RedisUtil {
      */
     public boolean setnx(String key, Object value, long time) {
         try {
-            redisTemplate.opsForValue().setIfAbsent(key, value, time, TimeUnit.SECONDS);
+            Boolean set = redisTemplate.opsForValue().setIfAbsent(key, value);
+            if (set) {
+                redisTemplate.expire(key, time, TimeUnit.SECONDS);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();

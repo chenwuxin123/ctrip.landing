@@ -11,5 +11,5 @@ import java.util.List;
  */
 @Data
 public class TimeLimitInfo implements Serializable {
-    private List<DateRestriction> DateRestrictions;
+    private List<DateRestriction> dateRestrictions;
 }

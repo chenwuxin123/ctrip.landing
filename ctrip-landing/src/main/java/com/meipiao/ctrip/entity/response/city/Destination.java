@@ -13,7 +13,6 @@ import java.util.List;
  * @Author: Chenwx
  * @Date: 2020/6/9 11:25
  */
-@Document(collection = "Destination")
 public class Destination implements Serializable {
     /**
      * CityID : 1
@@ -32,191 +31,166 @@ public class Destination implements Serializable {
      * ContinentEnName : Asia
      */
     @org.springframework.data.annotation.Id
-    private String Id;
-    private String CityID;
-    private String CityName;
-    private String CityEnName;
-    private String ParentCityID;
-    private String ParentCityName;
-    private String ParentCityEnName;
-    private String ProvinceID;
-    private String ProvinceName;
-    private String ProvinceEnName;
-    private String CountryID;
-    private String CountryName;
-    private String CountryEnName;
-    private String ContinentID;
-    private String ContinentEnName;
-    private List<Coordinates> Coordinates = new ArrayList<>();
-    private String ContinentName;
-    private long UpdateTimeStamp;
+    private String id;
+    private String cityID;
+    private String cityName;
+    private String cityEnName;
+    private String parentCityID;
+    private String parentCityName;
+    private String parentCityEnName;
+    private String provinceID;
+    private String provinceName;
+    private String provinceEnName;
+    private String countryID;
+    private String countryName;
+    private String countryEnName;
+    private String continentID;
+    private String continentEnName;
+    private List<Coordinates> coordinates = new ArrayList<>();
+    private String continentName;
+    private long updateTimeStamp;
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
-    }
-
-    public String getContinentName() {
-        return ContinentName;
-    }
-
-    public void setContinentName(String continentName) {
-        ContinentName = continentName;
-    }
-
-    public long getUpdateTimeStamp() {
-        return UpdateTimeStamp;
-    }
-
-    public void setUpdateTimeStamp(long updateTimeStamp) {
-        UpdateTimeStamp = updateTimeStamp;
-    }
-
-
-    public List<com.meipiao.ctrip.entity.response.city.Coordinates> getCoordinates() {
-        return Coordinates;
-    }
-
-    public void setCoordinates(List<com.meipiao.ctrip.entity.response.city.Coordinates> coordinates) {
-        Coordinates = coordinates;
+        this.id = id;
     }
 
     public String getCityID() {
-        return CityID;
+        return cityID;
     }
 
-    public void setCityID(String CityID) {
-        this.CityID = CityID;
+    public void setCityID(String cityID) {
+        this.cityID = cityID;
     }
 
     public String getCityName() {
-        return CityName;
+        return cityName;
     }
 
-    public void setCityName(String CityName) {
-        this.CityName = CityName;
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
     }
 
     public String getCityEnName() {
-        return CityEnName;
+        return cityEnName;
     }
 
-    public void setCityEnName(String CityEnName) {
-        this.CityEnName = CityEnName;
+    public void setCityEnName(String cityEnName) {
+        this.cityEnName = cityEnName;
     }
 
     public String getParentCityID() {
-        return ParentCityID;
+        return parentCityID;
     }
 
-    public void setParentCityID(String ParentCityID) {
-        this.ParentCityID = ParentCityID;
+    public void setParentCityID(String parentCityID) {
+        this.parentCityID = parentCityID;
     }
 
     public String getParentCityName() {
-        return ParentCityName;
+        return parentCityName;
     }
 
-    public void setParentCityName(String ParentCityName) {
-        this.ParentCityName = ParentCityName;
+    public void setParentCityName(String parentCityName) {
+        this.parentCityName = parentCityName;
     }
 
     public String getParentCityEnName() {
-        return ParentCityEnName;
+        return parentCityEnName;
     }
 
-    public void setParentCityEnName(String ParentCityEnName) {
-        this.ParentCityEnName = ParentCityEnName;
+    public void setParentCityEnName(String parentCityEnName) {
+        this.parentCityEnName = parentCityEnName;
     }
 
     public String getProvinceID() {
-        return ProvinceID;
+        return provinceID;
     }
 
-    public void setProvinceID(String ProvinceID) {
-        this.ProvinceID = ProvinceID;
+    public void setProvinceID(String provinceID) {
+        this.provinceID = provinceID;
     }
 
     public String getProvinceName() {
-        return ProvinceName;
+        return provinceName;
     }
 
-    public void setProvinceName(String ProvinceName) {
-        this.ProvinceName = ProvinceName;
+    public void setProvinceName(String provinceName) {
+        this.provinceName = provinceName;
     }
 
     public String getProvinceEnName() {
-        return ProvinceEnName;
+        return provinceEnName;
     }
 
-    public void setProvinceEnName(String ProvinceEnName) {
-        this.ProvinceEnName = ProvinceEnName;
+    public void setProvinceEnName(String provinceEnName) {
+        this.provinceEnName = provinceEnName;
     }
 
     public String getCountryID() {
-        return CountryID;
+        return countryID;
     }
 
-    public void setCountryID(String CountryID) {
-        this.CountryID = CountryID;
+    public void setCountryID(String countryID) {
+        this.countryID = countryID;
     }
 
     public String getCountryName() {
-        return CountryName;
+        return countryName;
     }
 
-    public void setCountryName(String CountryName) {
-        this.CountryName = CountryName;
+    public void setCountryName(String countryName) {
+        this.countryName = countryName;
     }
 
     public String getCountryEnName() {
-        return CountryEnName;
+        return countryEnName;
     }
 
-    public void setCountryEnName(String CountryEnName) {
-        this.CountryEnName = CountryEnName;
+    public void setCountryEnName(String countryEnName) {
+        this.countryEnName = countryEnName;
     }
 
     public String getContinentID() {
-        return ContinentID;
+        return continentID;
     }
 
-    public void setContinentID(String ContinentID) {
-        this.ContinentID = ContinentID;
+    public void setContinentID(String continentID) {
+        this.continentID = continentID;
     }
 
     public String getContinentEnName() {
-        return ContinentEnName;
+        return continentEnName;
     }
 
-    public void setContinentEnName(String ContinentEnName) {
-        this.ContinentEnName = ContinentEnName;
+    public void setContinentEnName(String continentEnName) {
+        this.continentEnName = continentEnName;
     }
 
-    @Override
-    public String toString() {
-        return "Destination{" +
-                "Id=" + Id +
-                ", CityID='" + CityID + '\'' +
-                ", CityName='" + CityName + '\'' +
-                ", CityEnName='" + CityEnName + '\'' +
-                ", ParentCityID='" + ParentCityID + '\'' +
-                ", ParentCityName='" + ParentCityName + '\'' +
-                ", ParentCityEnName='" + ParentCityEnName + '\'' +
-                ", ProvinceID='" + ProvinceID + '\'' +
-                ", ProvinceName='" + ProvinceName + '\'' +
-                ", ProvinceEnName='" + ProvinceEnName + '\'' +
-                ", CountryID='" + CountryID + '\'' +
-                ", CountryName='" + CountryName + '\'' +
-                ", CountryEnName='" + CountryEnName + '\'' +
-                ", ContinentID='" + ContinentID + '\'' +
-                ", ContinentEnName='" + ContinentEnName + '\'' +
-                ", Coordinates=" + Coordinates +
-                ", ContinentName='" + ContinentName + '\'' +
-                ", UpdateTimeStamp=" + UpdateTimeStamp +
-                '}';
+    public List<Coordinates> getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(List<Coordinates> coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    public String getContinentName() {
+        return continentName;
+    }
+
+    public void setContinentName(String continentName) {
+        this.continentName = continentName;
+    }
+
+    public long getUpdateTimeStamp() {
+        return updateTimeStamp;
+    }
+
+    public void setUpdateTimeStamp(long updateTimeStamp) {
+        this.updateTimeStamp = updateTimeStamp;
     }
 }

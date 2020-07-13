@@ -47,7 +47,7 @@ public class AuthorityController {
 
     private final String persistenceTokenKey = RedisKeyConstant.PERSISTENCE_TOKEN_KEY; //持久化key
 
-    private ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
 
     //初始化Access Token（GET方式）
 //    @GetMapping("/access/token")

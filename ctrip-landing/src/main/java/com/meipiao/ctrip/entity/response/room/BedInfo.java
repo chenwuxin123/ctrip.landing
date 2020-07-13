@@ -10,8 +10,8 @@ import java.io.Serializable;
  */
 @Data
 public class BedInfo implements Serializable {
-    private String ID;
-    private String Name;
-    private String NumberOfBeds;
-    private String BedWidth;
+    private String Id;
+    private String name;
+    private String numberOfBeds;
+    private String bedWidth;
 }

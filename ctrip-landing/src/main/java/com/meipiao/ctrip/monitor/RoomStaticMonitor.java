@@ -20,11 +20,11 @@ import java.io.IOException;
 //房型静态信息(物理房型,子房型
 @Slf4j
 @Component
-@RabbitListener(bindings = @QueueBinding(
-        value = @Queue(RabbitConstant.ROOM_STATIC_QUEUE),
-        exchange = @Exchange(RabbitConstant.ROOM_STATIC_EXCHANGE),
-        key = {RabbitConstant.ROOM_STATIC_ROUTINGKEY}
-))
+//@RabbitListener(bindings = @QueueBinding(
+//        value = @Queue(RabbitConstant.ROOM_STATIC_QUEUE),
+//        exchange = @Exchange(RabbitConstant.ROOM_STATIC_EXCHANGE),
+//        key = {RabbitConstant.ROOM_STATIC_ROUTINGKEY}
+//))
 public class RoomStaticMonitor {
 
     @Resource

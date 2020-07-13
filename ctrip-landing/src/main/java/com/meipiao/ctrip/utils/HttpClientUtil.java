@@ -38,7 +38,7 @@ public class HttpClientUtil {
             if (params != null) {
                 url = url + "?" + urlencode(params);
             }
-            log.info("请求的地址:{}", url);
+            log.info("=========请求的地址:{}=========", url);
 
             // 创建http GET请求
             HttpGet httpGet = new HttpGet(url);
@@ -49,7 +49,7 @@ public class HttpClientUtil {
             long end = System.currentTimeMillis();
             if (response.getStatusLine().getStatusCode() == 200) {
                 resultString = EntityUtils.toString(response.getEntity(), DEF_CHATSET);
-                log.info("执行时间{}ms", end - start);
+                log.info("=========执行时间{}ms=========", end - start);
             }
         } catch (Exception e) {
             log.error("{}方法中http请求发生异常:{}", HttpClientUtil.class.getName(), e.getMessage());

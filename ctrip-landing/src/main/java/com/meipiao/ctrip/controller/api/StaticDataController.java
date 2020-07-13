@@ -1,18 +1,15 @@
 package com.meipiao.ctrip.controller.api;
 
 import com.alibaba.fastjson.JSONObject;
+
 import com.meipiao.ctrip.annotation.AccessLimit;
 import com.meipiao.ctrip.constant.RedisKeyConstant;
 import com.meipiao.ctrip.controller.auth.AuthorityController;
-import com.meipiao.ctrip.controller.task.RabbitMQSenderController;
 import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
-import com.meipiao.ctrip.entity.response.rate.CancelDetail;
-import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
-import com.meipiao.ctrip.entity.response.rate.PriceDetail;
+import com.meipiao.ctrip.entity.response.rate.RoomPriceRes;
 import com.meipiao.ctrip.entity.response.room.RoomDetail;
-import com.meipiao.ctrip.entity.response.room.SubRoomDetail;
 import com.meipiao.ctrip.service.MongodbService;
 import com.meipiao.ctrip.utils.*;
 import com.mongodb.BasicDBObject;
@@ -30,7 +27,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,8 +54,8 @@ public class StaticDataController {
     @Resource
     AuthorityController authorityController;
 
-    @Resource
-    RabbitMQSenderController rabbitMQSenderController;
+//    @Resource
+//    RabbitMQSenderController rabbitMQSenderController;
 
     @Resource
     MongoTemplate mongoTemplate;
@@ -84,6 +87,9 @@ public class StaticDataController {
     @Value("${MONITOR.ROOM.INCREMENT}")
     private String roomIncrementICODE;   //监测房价、房量、房态增量变化ICODE
 
+    @Value("${LOWEST.PRICE}")
+    private String LOWEST_PRICE_ICODE;   //查询酒店最低价房型
+
     @Value("${ctrip.http.address}")
     private String httpAddress;     //携程请求地址
 
@@ -97,6 +103,7 @@ public class StaticDataController {
     private String UniqueID;
 
     private static ThreadLocal threadLocal = new ThreadLocal<>();
+
 
     private Map putParam() {
         ConcurrentHashMap<String, String> map = new ConcurrentHashMap<>();
@@ -149,10 +156,10 @@ public class StaticDataController {
           PageSize: 每页记录数，最大限制5000
           LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
-    @AccessLimit(perSecond = 3, timeOut = 100000)
-    public void City() throws InterruptedException {
+//    @AccessLimit(perSecond = 3, timeOut = 100000)
+    public void city() throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
-        int PageSize = 5000;
+        int PageSize = 2000;
         Map map = putParam();
         map.put("ICODE", cityICODE);
         String UUID = java.util.UUID.randomUUID().toString();
@@ -167,7 +174,7 @@ public class StaticDataController {
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), result);
                 break;
             }
             //获取实体集合，添加至mongodb
@@ -182,16 +189,16 @@ public class StaticDataController {
     @ApiOperation(value = "获取酒店清单")
     /*
          CityID: 城市ID
-         PageSize: 每页记录数，最大限制5000
+         PageSize: 每页记录数，最大限制2000
          LastRecordID: 首次调用，传空。之后，每次传上次调用时返回报文当中的LastRecordID
      */
-    @AccessLimit(perSecond = 3, timeOut = 100000)
+//    @AccessLimit(perSecond = 3, timeOut = 100000)
     public void getHotelID() throws InterruptedException {
         /*
             获取mongodb中所有CityID 进行遍历查询HotelId
         */
         //查找城市id
-        int PageSize = 5000;
+        int PageSize = 2000;
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", hotelidICODE);
@@ -206,6 +213,7 @@ public class StaticDataController {
             //执行业务
             String LastRecordID = "";
             int updateCount = 0;
+            System.out.println("请求的城市ID：" + cityID);
             do {
                 //获取Access Token
                 String accessToken = getAccessToken(UUID);
@@ -215,13 +223,14 @@ public class StaticDataController {
                 String result = HttpClientUtil.doPostJson(serverHost, map, json);
                 String ack = ResponseToBeanUtil.getResponseStatus(result);
                 if (!"Success".equals(ack)) {
-                    log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                    log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), result);
                     break;
                 }
                 //获取实体集合，添加至mongodb
-                ArrayList<HotelIdDetail> hotelIdDetail = ResponseToBeanUtil.getHotelIdDetailBean(result, cityObj);
+                ArrayList<HotelIdDetail> hotelIdDetail = ResponseToBeanUtil.getHotelIdDetailBean(result, cityJson);
                 updateCount += mongodbService.updateHotelId(hotelIdDetail);
                 LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
+                System.out.println("lastRecordID为" + LastRecordID);
             } while (!"".equals(LastRecordID));
             log.info("此次请求全量城市信息共添加|更新了{}条数据", updateCount);
         }
@@ -230,11 +239,14 @@ public class StaticDataController {
     /*
         @GetMapping("/hotel/static")
         @ApiOperation(value = "获取酒店静态信息")
-
+List<String> hotelIds
      */
-    @Async
-    public void getHotelStatic(List<String> hotelIds) throws InterruptedException {
+//    @Async
+    @GetMapping("/hotel/static")
+    @ApiOperation(value = "获取酒店静态信息")
+    public void getHotelStatic(String hotelId) throws InterruptedException {
         //获取sid aid uuid 请求的ICODE lock的UUID
+        List<String> hotelIds = Arrays.asList(hotelId);
         Map map = putParam();
         map.put("ICODE", hotelInfoICODE);
         String UUID = java.util.UUID.randomUUID().toString();
@@ -246,8 +258,11 @@ public class StaticDataController {
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
+            //---------------------------------输出结果-------------------------//
+            System.out.println(result);
+            //---------------------------------输出结果-------------------------//
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), result);
                 break;
             }
             //获取实体集合，添加至mongodb
@@ -261,10 +276,12 @@ public class StaticDataController {
         @ApiOperation(value = "获取房型静态信息")
 
      */
-    @Async
+//    @Async
+    @GetMapping("/room/static")
+    @ApiOperation(value = "获取房型静态信息")
     public void getRoomStatic(String hotelId) throws InterruptedException {
 
-        int PageSize = 1000; //分页每次请求售卖房型数量，最大限制1000
+        int PageSize = 10; //分页每次请求售卖房型数量，最大限制1000
         //获取sid aid uuid 请求的ICODE lock的UUID
         Map map = putParam();
         map.put("ICODE", roomInfoICODE);
@@ -279,27 +296,45 @@ public class StaticDataController {
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
+            //---------------------------------输出结果-------------------------//
+            System.out.println(result);
+            //---------------------------------输出结果-------------------------//
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), result);
                 break;
             }
             //获取实体集合，添加至mongodb
             List<RoomDetail> roomStaticBean = ResponseToBeanUtil.getRoomStaticBean(result, hotelId);
             mongodbService.updateRoomStatic(roomStaticBean);
-            List<SubRoomDetail> subRoomStaticBean = ResponseToBeanUtil.getSubRoomStaticBean(result, hotelId);
-            mongodbService.updateSubRoomStatic(subRoomStaticBean);
             LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
         } while (!"".equals(LastRecordID));
     }
 
-
+    public static void main(String[] args) {
+        String start = "2020-08-09";
+        String end  = "2020-08-12";
+        SimpleDateFormat formater = new SimpleDateFormat("yyyy-MM-dd");
+        Integer diff=0;
+        try {
+            long d1 = formater.parse(end).getTime();
+            long d2 = formater.parse(start).getTime();
+            diff= Math.toIntExact((d1 - d2) / (1000 * 60 * 60 * 24));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        System.out.println(diff);
+    }
     /*
         @GetMapping("/query/rate")
         @ApiOperation(value = "直连查询")
      */
-    @Async
-    @AccessLimit(perSecond = 100, timeOut = 100000)
-    public void queryRate(String hotelId, String start, String end) throws InterruptedException {
+//    @Async
+//    @AccessLimit(perSecond = 100, timeOut = 100000)
+    @GetMapping("/query/rate")
+    @ApiOperation(value = "直连查询")
+    public List<RoomPriceRes> queryRate(String hotelId, String start, String end) throws InterruptedException {
+
+        List<RoomPriceRes> priceRes= new ArrayList<>();
         int PageSize = 20;//	分页每次请求售卖房型数量，结算价分销商请求该接口时若接口返回房型数量超过200时，接口默认返回200个房型
         Map map = putParam();
         map.put("ICODE", rateDirect);
@@ -319,26 +354,20 @@ public class StaticDataController {
             String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
             String result = HttpClientUtil.doPostJson(serverHost, map, json);
             String ack = ResponseToBeanUtil.getResponseStatus(result);
+            //---------------------------------输出结果-------------------------//
+            System.out.println(result);
+            //---------------------------------输出结果-------------------------//
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), result);
+                log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), result);
                 break;
             }
-            //添加至mongodb
-            List<PriceDetail> priceDetailBean = ResponseToBeanUtil.getPriceDetailBean(result, hotelId);
-            List<PolicyDetail> policyDetailBean = ResponseToBeanUtil.getPolicyDetailBean(result, hotelId);
-            List<CancelDetail> cancelDetailBean = ResponseToBeanUtil.getCancelDetailBean(result, hotelId);
+             priceRes = ResponseToBeanUtil.getPrice(result, hotelId);
 
-            if (priceDetailBean.size() != 0) {
-                mongodbService.updatePriceDetail(priceDetailBean);
-            }
-            if (policyDetailBean.size() != 0) {
-                mongodbService.updatePolicyDetail(policyDetailBean);
-            }
-            if (cancelDetailBean.size() != 0) {
-                mongodbService.updateCancelDetail(cancelDetailBean);
-            }
+//            mongoTemplate.insert(price, RoomPriceRes.class);
+
             LastRecordID = ResponseToBeanUtil.getLastRecordID(result);
         } while (!"".equals(LastRecordID));
+        return priceRes;
     }
 
     /*
@@ -367,18 +396,43 @@ public class StaticDataController {
             String ack = ResponseToBeanUtil.getResponseStatus(threadLocal.get().toString());
             timestamp = ResponseToBeanUtil.getResponseTimestamp(threadLocal.get().toString());
             if (!"Success".equals(ack)) {
-                log.warn("{}请求出现错误!错误信息{}  --请检查输入参数是否正确", Thread.currentThread().getName(), threadLocal.get().toString());
+                log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), threadLocal.get().toString());
                 break;
             }
             //获取到HotelId集合,进行下一步去重,发送至mq
             List<String> hotelIds = ResponseToBeanUtil.getIncrementPriceBean(threadLocal.get().toString());
             if (hotelIds.size() != 0) {
-                rabbitMQSenderController.sendIncrementPrice(hotelIds);
+//                rabbitMQSenderController.sendIncrementPrice(hotelIds);
             }
             LastRecordID = ResponseToBeanUtil.getLastRecordID(threadLocal.get().toString());
         } while (!"".equals(LastRecordID));
         log.info("每秒增量入队时间花费共{}s：", (System.currentTimeMillis() / 1000 - s));
         return new AsyncResult(timestamp);
+    }
+
+
+    @GetMapping("/lowest/price")
+    @ApiOperation(value = "获取起价")
+    public void getLowestPrice(Integer city, String checkInDate, String checkOutDate, String hotelList, String lowPrice, String highPrice) throws InterruptedException {
+
+        //获取sid aid uuid 请求的ICODE lock的UUID
+        Map map = putParam();
+        map.put("ICODE", LOWEST_PRICE_ICODE);
+        String UUID = java.util.UUID.randomUUID().toString();
+        //获得Access Token
+        String accessToken = getAccessToken(UUID);
+        map.put("Token", accessToken);
+        String json = RequestBeanToJson.getLowestPrice(city, checkInDate, checkOutDate, hotelList, lowPrice, highPrice);
+        System.out.println(json);
+        String serverHost = httpAddress + "/openservice/serviceproxy.ashx";
+        String result = HttpClientUtil.doPostJson(serverHost, map, json);
+        String ack = ResponseToBeanUtil.getResponseStatus(result);
+        //---------------------------------输出结果-------------------------//
+        System.out.println(result);
+        //---------------------------------输出结果-------------------------//
+        if (!"Success".equals(ack)) {
+            log.warn("{}请求出现错误!错误信息{} ", Thread.currentThread().getName(), result);
+        }
     }
 
 }

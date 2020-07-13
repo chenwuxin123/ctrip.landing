@@ -1,19 +1,21 @@
 package com.meipiao.ctrip.utils;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.meipiao.ctrip.entity.response.city.Coordinates;
 import com.meipiao.ctrip.entity.response.city.Destination;
 import com.meipiao.ctrip.entity.response.hotel.HotelDetail;
 import com.meipiao.ctrip.entity.response.hotel.HotelIdDetail;
-import com.meipiao.ctrip.entity.response.rate.CancelDetail;
-import com.meipiao.ctrip.entity.response.rate.CancelEntity;
-import com.meipiao.ctrip.entity.response.rate.PolicyDetail;
-import com.meipiao.ctrip.entity.response.rate.PriceDetail;
+import com.meipiao.ctrip.entity.response.hotel.TransportationInfos;
+import com.meipiao.ctrip.entity.response.rate.DailyPrices;
+import com.meipiao.ctrip.entity.response.rate.RoomPriceRes;
 import com.meipiao.ctrip.entity.response.room.*;
+import com.meipiao.ctrip.entity.vo.hotel.HotelFacility;
+import com.meipiao.ctrip.entity.vo.hotel.HotelPolicy;
+import com.meipiao.ctrip.entity.vo.imge.Image;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 将相应结果转化成相应的Bean
@@ -23,12 +25,11 @@ import java.util.List;
  */
 public class ResponseToBeanUtil {
     public static void main(String[] args) {
-        String result = "{\"ResponseStatus\":{\"Timestamp\":\"2020-06-24T15:53:22.318+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]}}";
-        List<PriceDetail> priceDetailBean = getPriceDetailBean(result, "18026030");
-        if (priceDetailBean.size() != 0) {
-            for (PriceDetail priceDetail : priceDetailBean) {
-                System.out.println(priceDetail);
-            }
+        String res = "{\"ResponseStatus\":{\"Timestamp\":\"2020-07-09T15:18:04.779+08:00\",\"Ack\":\"Success\",\"Errors\":[],\"Extension\":[]},\"PagingInfo\":{\"LastRecordID\":\"\"},\"RoomPriceItems\":[{\"RoomPriceInfos\":[{\"CancelPolicyInfos\":[{\"PenaltyAmount\":[],\"Start\":\"0001-01-01T00:00:00.0000000\",\"End\":\"2020-07-11T00:00:00.0000000+08:00\"}],\"ReserveTimeLimitInfo\":{\"LatestReserveTime\":\"9999-12-31T23:59:59.0000999+08:00\"},\"HoldDeadline\":{},\"PriceInfos\":[{\"Prices\":[{\"Type\":\"DisplayCostCurrency\",\"ExclusiveAmount\":102.6120,\"InclusiveAmount\":102.6120,\"Currency\":\"CNY\"},{\"Type\":\"OriginalCostCurrency\",\"ExclusiveAmount\":102.6120,\"InclusiveAmount\":102.6120,\"Currency\":\"CNY\"}],\"DailyPrices\":[{\"MealInfo\":{\"NumberOfBreakfast\":0,\"NumberOfLunch\":0,\"NumberOfDinner\":0,\"IsOptionalMeal\":false},\"Prices\":[{\"Type\":\"DisplayCostCurrency\",\"ExclusiveAmount\":51.3060,\"InclusiveAmount\":51.3060,\"Currency\":\"CNY\"},{\"Type\":\"OriginalCostCurrency\",\"ExclusiveAmount\":51.3060,\"InclusiveAmount\":51.3060,\"Currency\":\"CNY\"}],\"Cashbacks\":[],\"EffectiveDate\":\"2020-07-09T00:00:00.0000000+08:00\",\"GuaranteeCode\":\"2\"},{\"MealInfo\":{\"NumberOfBreakfast\":0,\"NumberOfLunch\":0,\"NumberOfDinner\":0,\"IsOptionalMeal\":false},\"Prices\":[{\"Type\":\"DisplayCostCurrency\",\"ExclusiveAmount\":51.3060,\"InclusiveAmount\":51.3060,\"Currency\":\"CNY\"},{\"Type\":\"OriginalCostCurrency\",\"ExclusiveAmount\":51.3060,\"InclusiveAmount\":51.3060,\"Currency\":\"CNY\"}],\"Cashbacks\":[],\"EffectiveDate\":\"2020-07-10T00:00:00.0000000+08:00\",\"GuaranteeCode\":\"2\"}],\"Taxes\":[],\"Fees\":[],\"PayType\":\"PP\",\"RatePlanCategory\":\"501\",\"IsCanReserve\":true,\"IsGuarantee\":false,\"IsInstantConfirm\":true,\"RemainingRooms\":\"2\",\"IsPromotion\":\"T\",\"IsFastConfirm\":true}],\"RoomID\":166609473,\"RoomName\":\"温馨6人间(仅女生入住)\"}],\"RoomTypeID\":74005651},{\"RoomPriceInfos\":[{\"CancelPolicyInfos\":[{\"PenaltyAmount\":[],\"Start\":\"0001-01-01T00:00:00.0000000\",\"End\":\"2020-07-11T00:00:00.0000000+08:00\"}],\"ReserveTimeLimitInfo\":{\"LatestReserveTime\":\"9999-12-31T23:59:59.0000999+08:00\"},\"HoldDeadline\":{},\"PriceInfos\":[{\"Prices\":[{\"Type\":\"DisplayCostCurrency\",\"ExclusiveAmount\":113.6280,\"InclusiveAmount\":113.6280,\"Currency\":\"CNY\"},{\"Type\":\"OriginalCostCurrency\",\"ExclusiveAmount\":113.6280,\"InclusiveAmount\":113.6280,\"Currency\":\"CNY\"}],\"DailyPrices\":[{\"MealInfo\":{\"NumberOfBreakfast\":0,\"NumberOfLunch\":0,\"NumberOfDinner\":0,\"IsOptionalMeal\":false},\"Prices\":[{\"Type\":\"DisplayCostCurrency\",\"ExclusiveAmount\":56.8140,\"InclusiveAmount\":56.8140,\"Currency\":\"CNY\"},{\"Type\":\"OriginalCostCurrency\",\"ExclusiveAmount\":56.8140,\"InclusiveAmount\":56.8140,\"Currency\":\"CNY\"}],\"Cashbacks\":[],\"EffectiveDate\":\"2020-07-09T00:00:00.0000000+08:00\",\"GuaranteeCode\":\"2\"},{\"MealInfo\":{\"NumberOfBreakfast\":0,\"NumberOfLunch\":0,\"NumberOfDinner\":0,\"IsOptionalMeal\":false},\"Prices\":[{\"Type\":\"DisplayCostCurrency\",\"ExclusiveAmount\":56.8140,\"InclusiveAmount\":56.8140,\"Currency\":\"CNY\"},{\"Type\":\"OriginalCostCurrency\",\"ExclusiveAmount\":56.8140,\"InclusiveAmount\":56.8140,\"Currency\":\"CNY\"}],\"Cashbacks\":[],\"EffectiveDate\":\"2020-07-10T00:00:00.0000000+08:00\",\"GuaranteeCode\":\"2\"}],\"Taxes\":[],\"Fees\":[],\"PayType\":\"PP\",\"RatePlanCategory\":\"501\",\"IsCanReserve\":true,\"IsGuarantee\":false,\"IsInstantConfirm\":false,\"RemainingRooms\":\"10+\",\"IsPromotion\":\"T\",\"IsFastConfirm\":false}],\"RoomID\":166608980,\"RoomName\":\"简洁4人间(仅女生入住)\"}],\"RoomTypeID\":74005717}],\"LogInfo\":{\"LogID\":\"dd07ff0b-79f0-4b12-acb4-b477bf5d03aa\"}}\n";
+        List<RoomPriceRes> price = getPrice(res, "213214");
+        for (RoomPriceRes roomPriceRes : price) {
+            String s = JSONObject.toJSONString(roomPriceRes);
+            System.out.println(s);
         }
     }
 
@@ -36,6 +37,9 @@ public class ResponseToBeanUtil {
         JSONObject obj = JSONObject.parseObject(result);
         //获取状态码
         JSONObject responseStatus = JSONObject.parseObject(obj.getString("ResponseStatus"));
+        if (responseStatus == null) {
+            return "Fail";
+        }
         return responseStatus.getString("Ack");
     }
 
@@ -105,7 +109,8 @@ public class ResponseToBeanUtil {
     }
 
     //城市酒店清单
-    public static ArrayList<HotelIdDetail> getHotelIdDetailBean(String result, JSONObject cityObj) {
+    public static ArrayList<HotelIdDetail> getHotelIdDetailBean(String result, String cityJson) {
+        JSONObject cityObj = JSONObject.parseObject(cityJson);
         JSONObject jsonBean = JSONObject.parseObject(result);
         ArrayList<HotelIdDetail> hotelIdDetailList = new ArrayList<>();
         List<String> hotelIDs = (List) jsonBean.get("HotelIDs");
@@ -127,24 +132,28 @@ public class ResponseToBeanUtil {
         JSONObject hotelStaticInfo = JSONObject.parseObject(result).getJSONObject("HotelStaticInfo");
         String hotelNameEN = "";
         String hotelAddressEN = "";
-        String masterHotelNum = hotelStaticInfo.getString("HotelID");
+        Long masterHotelNum = Long.parseLong(hotelStaticInfo.getString("HotelID"));
         String hotelName = hotelStaticInfo.getString("HotelName");
         JSONArray hotelTags = hotelStaticInfo.getJSONArray("HotelTags");
         //酒店和地址英文名称
-        for (Object hotelTag : hotelTags) {
-            JSONObject hotelTagsJson = JSONObject.parseObject(hotelTag.toString());
-            if ("HotelNameEN".equals(hotelTagsJson.getString("Name"))) {
-                //new 对象 到时候直接set
-                hotelNameEN = hotelTagsJson.getString("Value");
-            } else if ("HotelAddressEN".equals(hotelTagsJson.getString("Name"))) {
-                hotelAddressEN = hotelTagsJson.getString("Value");
+        if (hotelTags != null) {
+            for (Object hotelTag : hotelTags) {
+                JSONObject hotelTagsJson = JSONObject.parseObject(hotelTag.toString());
+                if ("HotelNameEN".equals(hotelTagsJson.getString("Name"))) {
+                    //new 对象 到时候直接set
+                    hotelNameEN = hotelTagsJson.getString("Value");
+                } else if ("HotelAddressEN".equals(hotelTagsJson.getString("Name"))) {
+                    hotelAddressEN = hotelTagsJson.getString("Value");
+                }
             }
         }
+
         String hotelApplicability = hotelStaticInfo.getJSONObject("ApplicabilityInfo").getString("HotelApplicability");//酒店是否有(3,仅接待大陆客人;4,仅接待大陆和港澳台客人;5,接待大陆、港澳台及外国客人)
         Integer starRating = hotelStaticInfo.getInteger("StarRating"); //星级
         Boolean isOfficialRating = hotelStaticInfo.getBoolean("IsOfficialRating");//标明星级是否有政府机构评定
         String openYear = hotelStaticInfo.getString("OpenYear");
-        Integer roomQuantity = hotelStaticInfo.getInteger("RoomQuantity");//酒店的客房数量
+        openYear = openYear + " 00:00:00";
+        String roomQuantity = hotelStaticInfo.getString("RoomQuantity");//酒店的客房数量
         String telephone = hotelStaticInfo.getJSONObject("ContactInfo").getString("Telephone");//电话
         String fax = hotelStaticInfo.getJSONObject("ContactInfo").getString("Fax");//传真
         //GeoInfo
@@ -155,6 +164,16 @@ public class ResponseToBeanUtil {
         String province = geoInfo.getJSONObject("Province").getString("Name");//省份
         String city = geoInfo.getJSONObject("City").getString("Name");//城市
 
+        //BusinessDistrict
+        String businessName = "";
+        JSONArray businessDistricts = geoInfo.getJSONArray("BusinessDistrict");
+        if (businessDistricts != null) {
+            for (Object businessDistrict : businessDistricts) {
+                businessName = JSONObject.parseObject(businessDistrict.toString()).getString("Name");
+            }
+        }
+
+        //Coordinates
         ArrayList<Coordinates> coordinatesWays = new ArrayList<>();
         JSONArray coordinates = geoInfo.getJSONArray("Coordinates");
         for (Object coordinate : coordinates) {
@@ -168,29 +187,99 @@ public class ResponseToBeanUtil {
             coordinatesWays.add(cds);
         }
 
+        //Pictures
+        List<Image> hotelPictures = new ArrayList<>();
+        JSONArray pictures = hotelStaticInfo.getJSONArray("Pictures");
+        for (Object picture : pictures) {
+            JSONObject pictureJson = JSONObject.parseObject(picture.toString());
+            if (pictureJson != null) {
+                String pictureUrl = pictureJson.getString("URL");
+                String caption = pictureJson.getString("Caption");//图片标题
+                Image image = new Image();
+                image.setCaption(caption);
+                image.setUrl(pictureUrl);
+                hotelPictures.add(image);
+            }
+        }
+
+        //Descriptions
+        JSONArray descriptions = hotelStaticInfo.getJSONArray("Descriptions");
+        String text = "";
+        if (descriptions.size() > 1) {
+            text = JSONObject.parseObject(descriptions.get(1).toString()).getString("Text");
+        }
+
+        //FacilitiesV2(酒店设施)
+        JSONArray facilitiesV2 = hotelStaticInfo.getJSONArray("FacilitiesV2");
+        ArrayList<String> hotelFacilities = new ArrayList<>();
+        if (facilitiesV2 != null) {
+            for (Object facilities : facilitiesV2) {
+                String name = JSONObject.parseObject(facilities.toString()).getString("Name");
+                hotelFacilities.add(name);
+            }
+        }
+        HotelFacility hotelFacility = new HotelFacility();
+        hotelFacility.setFacilityItems(hotelFacilities);
+        ArrayList<HotelFacility> fcs = new ArrayList<>();
+        fcs.add(hotelFacility);
+
+        //Policies
+        JSONArray policies = hotelStaticInfo.getJSONArray("Policies");
+        ArrayList<String> hotelPolicie = new ArrayList<>();
+        if (policies != null) {
+            for (Object policy : policies) {
+                String pText = JSONObject.parseObject(policy.toString()).getString("Text");
+                hotelPolicie.add(pText);
+            }
+        }
+
+        HotelPolicy hotelPolicy = new HotelPolicy();
+        hotelPolicy.setPolicyItems(hotelPolicie);
+        ArrayList<HotelPolicy> pls = new ArrayList<>();
+        pls.add(hotelPolicy);
+
+        //TransportationInfos(酒店周边交通信息)
+        JSONArray transportationInfos = hotelStaticInfo.getJSONArray("TransportationInfos");
+        ArrayList<TransportationInfos> tsiList = new ArrayList<>();
+        if (transportationInfos != null) {
+            for (Object transportationInfo : transportationInfos) {
+                TransportationInfos tsi = new TransportationInfos();
+                String transportName = JSONObject.parseObject(transportationInfo.toString()).getString("Name");
+                Double distance = JSONObject.parseObject(transportationInfo.toString()).getDouble("Distance");
+                String directions = JSONObject.parseObject(transportationInfo.toString()).getString("Directions");
+                Double timeTaken = JSONObject.parseObject(transportationInfo.toString()).getDouble("TimeTaken");
+                tsi.setName(transportName);
+                tsi.setDistance(distance);
+                tsi.setDirections(directions);
+                tsi.setTimeTaken(timeTaken);
+                tsiList.add(tsi);
+            }
+        }
+
         HotelDetail hotelDetailBean = new HotelDetail();
         //set
-        hotelDetailBean.setUpdateTimeStamp(System.currentTimeMillis());
-        hotelDetailBean.setMasterHotelNum(masterHotelNum);
-        hotelDetailBean.setDataFlag("3".equals(hotelApplicability) ? 1 : 0);
+        hotelDetailBean.setTransportationInfos(tsiList);
+        hotelDetailBean.setHotelPolicys(pls);
+        hotelDetailBean.setHotelFacilitys(fcs);
+        hotelDetailBean.setHotelIntroduce(text);
+        hotelDetailBean.setBusinessName(businessName);
+        hotelDetailBean.setPictures(hotelPictures);
+        hotelDetailBean.setHotelId(masterHotelNum);
+        hotelDetailBean.setDataFlag("3".equals(hotelApplicability) || "5".equals(hotelApplicability) ? 1 : 0);
         hotelDetailBean.setHotelName(hotelName);
-        if (!"".equals(hotelNameEN)) {
-            hotelDetailBean.setHotelNameEn(hotelNameEN);
-        }
-        if (!"".equals(hotelAddressEN)) {
-            hotelDetailBean.setAddressEn(hotelAddressEN);
-        }
-        hotelDetailBean.setStarRating(starRating);
+        hotelDetailBean.setHotelEngName(hotelNameEN);
+        hotelDetailBean.setAddressEn(hotelAddressEN);
+        hotelDetailBean.setHotelStar(starRating);
         hotelDetailBean.setIsOfficialRating(isOfficialRating ? 1 : 0);
-        hotelDetailBean.setOpenYear(openYear);
-        hotelDetailBean.setRoomQuantity(roomQuantity);
+        hotelDetailBean.setPraciceDate(openYear);
+        hotelDetailBean.setRoomNum(roomQuantity);
         hotelDetailBean.setAddress(address);
         hotelDetailBean.setCoordinates(coordinatesWays);
         hotelDetailBean.setCountryName(country);
         hotelDetailBean.setProvinceName(province);
         hotelDetailBean.setCityName(city);
-        hotelDetailBean.setPostalCode(postalCode);
-        hotelDetailBean.setPhone(telephone);
+        hotelDetailBean.setPostCode(postalCode);
+        hotelDetailBean.setTelephone(telephone);
         hotelDetailBean.setFax(fax);
         return hotelDetailBean;
     }
@@ -235,22 +324,117 @@ public class ResponseToBeanUtil {
                     String bedInfoName = bedInfo.getString("Name");//具体床名
                     String numberOfBeds = bedInfo.getString("NumberOfBeds");
                     String bedWidth = bedInfo.getString("BedWidth");
-                    bedInfoBean.setID(bedInfoId);
+                    bedInfoBean.setId(bedInfoId);
                     bedInfoBean.setName(bedInfoName);
                     bedInfoBean.setNumberOfBeds(numberOfBeds);
                     bedInfoBean.setBedWidth(bedWidth);
                     bedInfosList.add(bedInfoBean);
                 }
                 Beds beds = new Beds();
-                beds.setID(badId);
+                beds.setId(badId);
                 beds.setName(bedName);
                 beds.setBedInfo(bedInfosList);
                 bedList.add(beds);
             }
+
+            //Pictures
+            JSONArray pictures = jsonRoomType.getJSONArray("Pictures");
+            List<String> roomPicture = new ArrayList<>();
+            for (Object picture : pictures) {
+                String pictureURL = JSON.parseObject(picture.toString()).getString("URL");
+                roomPicture.add(pictureURL);
+            }
+
+            //子房型
+            List<SubRoomDetail> subList = new ArrayList<>();
+            //解析RoomInfos
+            JSONArray roomInfos = JSONObject.parseObject(roomStaticInfo.toString()).getJSONArray("RoomInfos");
+            for (Object roomInfo : roomInfos) {
+                JSONObject subRoomJson = JSONObject.parseObject(roomInfo.toString());
+                String subRoomId = subRoomJson.getString("RoomID");//子房型id
+                String roomName = subRoomJson.getString("RoomName");
+                String payType = subRoomJson.getString("PayType");
+                Integer subRoomQuantity = subRoomJson.getInteger("RoomQuantity");
+                Integer subMaxOccupancy = subRoomJson.getInteger("MaxOccupancy");
+                String subAreaRange = subRoomJson.getString("AreaRange");
+                String subFloorRange = subRoomJson.getString("FloorRange");
+                Integer subHasWindow = subRoomJson.getInteger("HasWindow");
+                String extraBedFee = subRoomJson.getString("ExtraBedFee");
+                Boolean isHourlyRoom = subRoomJson.getBoolean("IsHourlyRoom");
+                Boolean isFromAPI = subRoomJson.getBoolean("IsFromAPI");
+                Boolean isShowAgencyTag = subRoomJson.getBoolean("IsShowAgencyTag");
+                Integer invoiceType = subRoomJson.getInteger("InvoiceType");
+                String invoiceMode = subRoomJson.getString("InvoiceMode");
+                String isSupportSpecialInvoice = subRoomJson.getString("IsSupportSpecialInvoice");
+                Boolean receiveTextRemark = subRoomJson.getBoolean("ReceiveTextRemark");
+                String isNeedCustomerTelephone = subRoomJson.getString("IsNeedCustomerTelephone");
+                String isAllowRepricing = subRoomJson.getString("IsAllowRepricing");
+                String isClosed = subRoomJson.getString("IsClosed");
+                String isAllowSmoking = JSONObject.parseObject(subRoomJson.getString("Smoking")).getString("IsAllowSmoking");
+
+                //添加实体属性
+                SubRoomDetail subRoomDetail = new SubRoomDetail();
+                subRoomDetail.setUpdateTimeStamp(System.currentTimeMillis());
+                subRoomDetail.setHotelId(Long.parseLong(masterHotelNum));
+                subRoomDetail.setRoomCode(Long.parseLong(subRoomId));
+                subRoomDetail.setRoomId(Long.parseLong(roomId));
+                subRoomDetail.setRoomName(roomName);
+                subRoomDetail.setPayType(payType);
+                subRoomDetail.setRoomQuantity(subRoomQuantity);
+                subRoomDetail.setMaxOccupancy(subMaxOccupancy);
+                subRoomDetail.setAreaRange(subAreaRange);
+                subRoomDetail.setFloorRange(subFloorRange);
+                subRoomDetail.setHasWindow(subHasWindow);
+                subRoomDetail.setExtraBedFee(extraBedFee);
+                subRoomDetail.setIsHourlyRoom(isHourlyRoom ? "true" : "false");
+                subRoomDetail.setIsFromAPI(isFromAPI ? "true" : "false");
+                subRoomDetail.setIsShowAgencyTag(isShowAgencyTag ? "true" : "false");
+                subRoomDetail.setInvoiceType(invoiceType);
+                subRoomDetail.setInvoiceMode(invoiceMode);
+                subRoomDetail.setIsSupportSpecialInvoice(isSupportSpecialInvoice);
+                subRoomDetail.setReceiveTextRemark(receiveTextRemark ? "true" : "false");
+                subRoomDetail.setIsNeedCustomerTelephone(isNeedCustomerTelephone);
+                subRoomDetail.setIsClosed(isClosed);
+                subRoomDetail.setIsAllowRepricing(isAllowRepricing);
+                subRoomDetail.setIsAllowSmoking(isAllowSmoking);
+
+                //BookingRules
+                JSONArray bookingRules = subRoomJson.getJSONArray("BookingRules");
+                ArrayList<TimeLimitInfo> tliList = new ArrayList<>();
+                for (Object bookingRule : bookingRules) {
+                    JSONArray timeLimitInfos = JSONObject.parseObject(bookingRule.toString()).getJSONArray("TimeLimitInfo");
+                    //第二层list 放TimeLimitInfo
+                    TimeLimitInfo tli = new TimeLimitInfo();
+                    for (Object timeLimitInfo : timeLimitInfos) {
+                        //第一层list 放DateRestriction
+                        ArrayList<DateRestriction> drcList = new ArrayList<>();
+                        JSONArray dateRestrictions = JSONObject.parseObject(timeLimitInfo.toString()).getJSONArray("DateRestrictions");
+                        for (Object dateRestriction : dateRestrictions) {
+                            DateRestriction drc = new DateRestriction();
+                            String scope = JSONObject.parseObject(dateRestriction.toString()).getString("Scope");
+                            String dateType = JSONObject.parseObject(dateRestriction.toString()).getString("DateType");
+                            String start = JSONObject.parseObject(dateRestriction.toString()).getString("Start");
+                            String end = JSONObject.parseObject(dateRestriction.toString()).getString("End");
+                            drc.setDataType(dateType);
+                            drc.setScope(scope);
+                            drc.setStart(start);
+                            drc.setEnd(end);
+                            drcList.add(drc);
+                        }
+                        tli.setDateRestrictions(drcList);
+                    }
+                    tliList.add(tli);
+                }
+                subRoomDetail.setTimeLimitInfos(tliList);
+                subList.add(subRoomDetail);
+            }
+
             RoomDetail roomDetail = new RoomDetail();
+            roomDetail.setSubRoom(subList);
+            roomDetail.setPictures(roomPicture);
             roomDetail.setUpdateTimeStamp(System.currentTimeMillis());
-            roomDetail.setMasterHotelNum(masterHotelNum);
-            roomDetail.setRoomId(roomId);
+            roomDetail.setHotelId(Long.parseLong(masterHotelNum));
+            roomDetail.setRoomId(Long.parseLong(roomId));
             roomDetail.setRoomTypeName(roomTypeName);
             roomDetail.setStandardRoomType(standardRoomType);
             roomDetail.setRoomQuantity(roomQuantity);
@@ -304,9 +488,9 @@ public class ResponseToBeanUtil {
                 //添加实体属性
                 SubRoomDetail subRoomDetail = new SubRoomDetail();
                 subRoomDetail.setUpdateTimeStamp(System.currentTimeMillis());
-                subRoomDetail.setMasterHotelNum(masterHotelNum);
-                subRoomDetail.setRoomCode(subRoomId);
-                subRoomDetail.setRoomId(roomId);
+                subRoomDetail.setHotelId(Long.parseLong(masterHotelNum));
+                subRoomDetail.setRoomCode(Long.parseLong(subRoomId));
+                subRoomDetail.setRoomId(Long.parseLong(roomId));
                 subRoomDetail.setRoomName(roomName);
                 subRoomDetail.setPayType(payType);
                 subRoomDetail.setRoomQuantity(roomQuantity);
@@ -362,159 +546,119 @@ public class ResponseToBeanUtil {
         return subList;
     }
 
-    //直连政策
-    public static List<PolicyDetail> getPolicyDetailBean(String result, String masterHotelNum) {
-        ArrayList<PolicyDetail> pdList = new ArrayList<>();
-        JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
-        if(roomPriceItems == null){
-            return pdList;
-        }
-        for (Object roomPriceItem : roomPriceItems) {
-            JSONObject itemJson = JSONObject.parseObject(roomPriceItem.toString());
-            String roomId = itemJson.getString("RoomTypeID");//物理房型id
-            JSONArray roomPriceInfos = itemJson.getJSONArray("RoomPriceInfos");
-            for (Object roomPriceInfo : roomPriceInfos) {
-                JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
-                String roomCode = roomPriceJson.getString("RoomID");//子房型id
-                JSONArray priceInfos = roomPriceJson.getJSONArray("PriceInfos");
+    public static List<RoomPriceRes> getPrice(String result, String masterHotelNum) {
+        ArrayList<RoomPriceRes> roomPriceList = new ArrayList<>();
 
-                for (Object priceInfo : priceInfos) {
-                    JSONObject priceInfoJson = JSONObject.parseObject(priceInfo.toString());
-                    JSONArray dailyPrices = priceInfoJson.getJSONArray("DailyPrices");
-                    for (Object dailyPrice : dailyPrices) {
-                        JSONObject dailyPriceJson = JSONObject.parseObject(dailyPrice.toString());
-                        JSONObject mealInfo = JSONObject.parseObject(dailyPriceJson.getString("MealInfo"));
-                        Integer breakfast = mealInfo.getInteger("NumberOfBreakfast");
-                        Integer lunch = mealInfo.getInteger("NumberOfLunch");
-                        Integer dinner = mealInfo.getInteger("NumberOfDinner");
-                        PolicyDetail policyDetail = new PolicyDetail();
-                        policyDetail.setUpdateTimeStamp(System.currentTimeMillis() / 1000);
-                        policyDetail.setBreakfast(breakfast);//早
-                        policyDetail.setLunch(lunch);//中
-                        policyDetail.setDinner(dinner);//晚
-                        policyDetail.setMasterHotelNum(masterHotelNum);
-                        policyDetail.setRoomId(roomId);//物理房型id
-                        policyDetail.setRoomCode(roomCode);//子房型id
-                        policyDetail.setRatePlanId(MD5.getMD5(roomId + roomCode + breakfast));// 政策Id（md5-Key）RoomId+RoomCode+Breakfast
-                        pdList.add(policyDetail);
-                    }
-                }
-
-            }
-        }
-        return pdList;
-    }
-
-    //直连价格
-    public static List<PriceDetail> getPriceDetailBean(String result, String masterHotelNum) {
-        ArrayList<PriceDetail> pdList = new ArrayList<>();
         JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
         if (roomPriceItems == null) {
-            return pdList;
+            return roomPriceList;
         }
+
         //RoomPriceItems
         for (Object roomPriceItem : roomPriceItems) {
             JSONObject itemJson = JSONObject.parseObject(roomPriceItem.toString());
             String roomId = itemJson.getString("RoomTypeID");//物理房型id
             JSONArray roomPriceInfos = itemJson.getJSONArray("RoomPriceInfos");
+
             //RoomPriceInfos
             for (Object roomPriceInfo : roomPriceInfos) {
+                RoomPriceRes roomPriceRes = new RoomPriceRes();
+                ArrayList<DailyPrices> dpList = new ArrayList<>();
+
                 JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
                 String roomCode = roomPriceJson.getString("RoomID");//子房型id
+                String roomName = roomPriceJson.getString("RoomName");//子房型名称
+
+                String latestReserveTime = roomPriceJson.getJSONObject("ReserveTimeLimitInfo").getString("LatestReserveTime");//最后预定时间
+                String start = "";//取消政策的生效时间。 备注：Start定义了最晚免费取消时间。Start时间之前，客人可免费取消；Start之后，客人需承担相应罚金。
+                String end = "";//取消政策的失效时间
+                Double totalPirce = null;
+                String remainingRooms = "";//可定房量
+                String payType = "";
+                Boolean isCanReserve = null;
+                Boolean isGuarantee = null;
+                Boolean isPromotion = null;
+
+
+                //CancelPolicyInfos
+                JSONArray cancelPolicyInfos = roomPriceJson.getJSONArray("CancelPolicyInfos");
+                for (Object cancelPolicyInfo : cancelPolicyInfos) {
+                    JSONObject cancelJson = JSONObject.parseObject(cancelPolicyInfo.toString());
+                    start = cancelJson.getString("Start");
+                    end = cancelJson.getString("End");
+                }
+
                 JSONArray priceInfos = roomPriceJson.getJSONArray("PriceInfos");
                 //PriceInfos
                 for (Object priceInfo : priceInfos) {
                     JSONObject priceInfoJson = JSONObject.parseObject(priceInfo.toString());
-                    String remainingRooms = priceInfoJson.getString("RemainingRooms");//可定房量
-                    JSONArray dailyPrices = priceInfoJson.getJSONArray("DailyPrices");
+                    remainingRooms = priceInfoJson.getString("RemainingRooms");
+                    payType = priceInfoJson.getString("PayType");//支付类型，PP-预付，FG-到付
+                    isCanReserve = priceInfoJson.getBoolean("IsCanReserve");//售卖房型是否可预订，true-可预订，false-不可预订
+                    isGuarantee = priceInfoJson.getBoolean("IsGuarantee");//售卖房型是否需担保，true-需担保，false-不需担保
+                    isPromotion = priceInfoJson.getBoolean("IsPromotion");//是否已包含促销
+
+                    //Prices(最外层总价格)
+                    JSONArray totalPirces = priceInfoJson.getJSONArray("Prices");
+                    for (Object price : totalPirces) {
+                        Integer inclusiveAmount = JSONObject.parseObject(price.toString()).getInteger("InclusiveAmount");
+                        totalPirce = Double.valueOf(inclusiveAmount);
+                    }
+
                     //DailyPrices
+                    JSONArray dailyPrices = priceInfoJson.getJSONArray("DailyPrices");
                     for (Object dailyPrice : dailyPrices) {
-                        PriceDetail priceDetail = new PriceDetail();
+                        DailyPrices dailyPricesBean = new DailyPrices();//内层bean
+
+                        String cffectiveDate = JSONObject.parseObject(dailyPrice.toString()).getString("EffectiveDate");//每日价的生效日期
+                        String useDay = cffectiveDate.replace("T00:00:00.0000000+08:00", " 00:00:00");
+
+                        //MealInfo
+                        String mealInfo = JSONObject.parseObject(dailyPrice.toString()).getString("MealInfo");
+                        Integer breakfast = JSONObject.parseObject(mealInfo).getInteger("NumberOfBreakfast");
+                        Integer lunch = JSONObject.parseObject(mealInfo).getInteger("NumberOfLunch");
+                        Integer dinner = JSONObject.parseObject(mealInfo).getInteger("NumberOfDinner");
+
+                        Double inclusiveAmount = null;
+                        String currency = "";
                         JSONArray prices = JSONObject.parseObject(dailyPrice.toString()).getJSONArray("Prices");
-                        String useDay = JSONObject.parseObject(dailyPrice.toString()).getString("EffectiveDate");//每日价的生效日期
                         //Prices
                         for (Object price : prices) {
                             JSONObject priceJson = JSONObject.parseObject(price.toString());
-                            String type = priceJson.getString("Type");//卖价 or 结算价?
-                            String inclusiveAmount = priceJson.getString("InclusiveAmount");//税后价格
-                            String currency = priceJson.getString("Currency");//货币种类
-                            if ("DisplayCostCurrency".equals(type)) {
-                                priceDetail.setDisplayCostCurrency(inclusiveAmount);
-                            } else if ("OriginalCostCurrency".equals(type)) {
-                                priceDetail.setOriginalCostCurrency(inclusiveAmount);
-                            } else if ("DisplayCurrency".equals(type)) {
-                                priceDetail.setDisplayCurrency(inclusiveAmount);
-                            } else if ("OriginalCurrency".equals(type)) {
-                                priceDetail.setOriginalCurrency(inclusiveAmount);
-                            }
-                            priceDetail.setCurrency(currency);
-                            priceDetail.setUseDay(useDay);//请求的日期
+                            inclusiveAmount = Double.valueOf(priceJson.getInteger("InclusiveAmount"));
+                            currency = priceJson.getString("Currency");
                         }
-                        priceDetail.setUpdateTimeStamp(System.currentTimeMillis() / 1000);
-                        priceDetail.setMasterHotelNum(masterHotelNum);
-                        priceDetail.setRoomId(roomId);
-                        priceDetail.setRoomCode(roomCode);
-                        priceDetail.setRemainingRooms(remainingRooms);
-                        pdList.add(priceDetail);
+
+                        dailyPricesBean.setBreakfast(breakfast);//早
+                        dailyPricesBean.setLunch(lunch);//中
+                        dailyPricesBean.setDinner(dinner);//晚
+                        dailyPricesBean.setCurrency(currency);//货币种类
+                        dailyPricesBean.setEffectiveDate(useDay);//生效日期
+                        dailyPricesBean.setDisplayCurrency(inclusiveAmount);//税后价格
+                        dpList.add(dailyPricesBean);
+
                     }
                 }
-            }
-
-        }
-        return pdList;
-    }
-
-    //直连取消规则
-    public static List<CancelDetail> getCancelDetailBean(String result, String masterHotelNum) {
-        ArrayList<CancelDetail> cancelList = new ArrayList<>();
-        JSONArray roomPriceItems = JSONObject.parseObject(result).getJSONArray("RoomPriceItems");
-        if (roomPriceItems == null) {
-            return cancelList;
-        }
-        //RoomPriceItems
-        for (Object roomPriceItem : roomPriceItems) {
-            JSONObject itemJson = JSONObject.parseObject(roomPriceItem.toString());
-            String roomId = itemJson.getString("RoomTypeID");//物理房型id
-            JSONArray roomPriceInfos = itemJson.getJSONArray("RoomPriceInfos");
-            //RoomPriceInfos
-            for (Object roomPriceInfo : roomPriceInfos) {
-                JSONObject roomPriceJson = JSONObject.parseObject(roomPriceInfo.toString());
-                String roomCode = roomPriceJson.getString("RoomID");//子房型id
-
-                JSONArray cancelPolicyInfos = roomPriceJson.getJSONArray("CancelPolicyInfos");
-                //CancelPolicyInfos
-                for (Object cancelPolicyInfo : cancelPolicyInfos) {
-                    JSONObject cancelJson = JSONObject.parseObject(cancelPolicyInfo.toString());
-                    String start = cancelJson.getString("Start");//取消政策的生效时间。 备注：Start定义了最晚免费取消时间。Start时间之前，客人可免费取消；Start之后，客人需承担相应罚金。
-                    String end = cancelJson.getString("End");//取消政策的失效时间
-                    JSONArray penaltyAmount = cancelJson.getJSONArray("PenaltyAmount");
-                    //PenaltyAmount
-                    ArrayList<CancelEntity> ceList = new ArrayList<>();
-                    for (Object penalty : penaltyAmount) {
-                        CancelEntity cancelEntity = new CancelEntity();
-                        JSONObject penaltyJson = JSONObject.parseObject(penalty.toString());
-                        String type = penaltyJson.getString("Type");
-                        String amount = penaltyJson.getString("Amount");
-                        String currency = penaltyJson.getString("Currency");
-                        cancelEntity.setType(type);
-                        cancelEntity.setAmount(amount);
-                        cancelEntity.setCurrency(currency);
-                        ceList.add(cancelEntity);
-                    }
-                    CancelDetail cancelDetail = new CancelDetail();
-                    cancelDetail.setUpdateTimeStamp(System.currentTimeMillis() / 1000);
-                    cancelDetail.setMasterHotelNum(masterHotelNum);
-                    cancelDetail.setRoomId(roomId);//物理房型id
-                    cancelDetail.setRoomCode(roomCode);//子房型id
-                    cancelDetail.setCancels(ceList);
-                    cancelDetail.setStart(start);
-                    cancelDetail.setEnd(end);
-                    cancelList.add(cancelDetail);
-                }
+                roomPriceRes.setHotelId(Long.parseLong(masterHotelNum));
+                roomPriceRes.setRoomId(Long.parseLong(roomId));
+                roomPriceRes.setRoomCode(Long.parseLong(roomCode));
+                roomPriceRes.setRoomName(roomName);
+                roomPriceRes.setStart(start);
+                roomPriceRes.setEnd(end);
+                roomPriceRes.setLatestReserveTime(latestReserveTime);
+                roomPriceRes.setTotalPrice(totalPirce);
+                roomPriceRes.setRemainingRooms(remainingRooms);
+                roomPriceRes.setPayType(payType);
+                roomPriceRes.setCanReserve(isCanReserve);
+                roomPriceRes.setGuarantee(isGuarantee);
+                roomPriceRes.setPromotion(isPromotion);
+                roomPriceRes.setDailyPrices(dpList);
+                roomPriceList.add(roomPriceRes);
             }
         }
-        return cancelList;
+        return roomPriceList;
     }
+
 
     //价格增量
     public static List<String> getIncrementPriceBean(String result) {
@@ -530,4 +674,26 @@ public class ResponseToBeanUtil {
         }
         return list;
     }
+
+    //查询
+    public static Map<Long, Long> getLowestPrice(String result) {
+        HashMap<Long, Long> priceMap = new HashMap<>();
+        JSONArray hotelDataLists = JSONObject.parseObject(result).getJSONArray("HotelDataLists");
+        if (hotelDataLists == null) {
+            return priceMap;
+        }
+        for (Object hotelDataList : hotelDataLists) {
+            String hotelStatusEntity = JSONObject.parseObject(hotelDataList.toString()).getString("HotelStatusEntity");
+            JSONObject statusBean = JSONObject.parseObject(hotelStatusEntity);
+            if (statusBean == null) {
+                return priceMap;
+            }
+            Long hotelId = statusBean.getLong("Hotel");
+            Long minPrice = statusBean.getLong("MinPrice");
+            priceMap.put(hotelId, minPrice);
+        }
+        return priceMap;
+    }
+
+
 }

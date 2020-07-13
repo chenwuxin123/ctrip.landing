@@ -10,7 +10,7 @@ import java.io.Serializable;
  */
 @Data
 public class Coordinates implements Serializable {
-    private String Provider;
-    private String LNG;
-    private String LAT;
+    private String provider;
+    private String lNG;
+    private String lAT;
 }

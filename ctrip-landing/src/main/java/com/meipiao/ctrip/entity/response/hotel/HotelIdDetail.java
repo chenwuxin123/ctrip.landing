@@ -10,73 +10,60 @@ import java.io.Serializable;
  * @Author: Chenwx
  * @Date: 2020/6/10 15:03
  */
-@Document(collection = "HotelIdDetail")
 public class HotelIdDetail implements Serializable {
     @org.springframework.data.annotation.Id
-    private String Id;
-    private String CityID;
-    private String CityName;
-    private String ProvinceID;
-    private String ProvinceName;
-    private String HotelId;
+    private String id;
+    private String cityID;
+    private String cityName;
+    private String provinceID;
+    private String provinceName;
+    private String hotelId;
 
     public String getId() {
-        return Id;
+        return id;
     }
 
     public void setId(String id) {
-        Id = id;
+        this.id = id;
     }
 
     public String getCityID() {
-        return CityID;
+        return cityID;
     }
 
     public void setCityID(String cityID) {
-        CityID = cityID;
+        this.cityID = cityID;
     }
 
     public String getCityName() {
-        return CityName;
+        return cityName;
     }
 
     public void setCityName(String cityName) {
-        CityName = cityName;
+        this.cityName = cityName;
     }
 
     public String getProvinceID() {
-        return ProvinceID;
+        return provinceID;
     }
 
     public void setProvinceID(String provinceID) {
-        ProvinceID = provinceID;
+        this.provinceID = provinceID;
     }
 
     public String getProvinceName() {
-        return ProvinceName;
+        return provinceName;
     }
 
     public void setProvinceName(String provinceName) {
-        ProvinceName = provinceName;
+        this.provinceName = provinceName;
     }
 
     public String getHotelId() {
-        return HotelId;
+        return hotelId;
     }
 
     public void setHotelId(String hotelId) {
-        HotelId = hotelId;
-    }
-
-    @Override
-    public String toString() {
-        return "HotelIdDetail{" +
-                "Id='" + Id + '\'' +
-                ", CityID='" + CityID + '\'' +
-                ", CityName='" + CityName + '\'' +
-                ", ProvinceID='" + ProvinceID + '\'' +
-                ", ProvinceName='" + ProvinceName + '\'' +
-                ", HotelId='" + HotelId + '\'' +
-                '}';
+        this.hotelId = hotelId;
     }
 }

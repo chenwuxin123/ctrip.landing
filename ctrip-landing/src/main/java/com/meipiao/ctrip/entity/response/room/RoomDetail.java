@@ -11,80 +11,67 @@ import java.util.List;
  * @Date: 2020/6/11 13:59
  */
 @Data
-@Document(collection = "RoomDetail")
 public class RoomDetail implements Serializable {
-    @org.springframework.data.annotation.Id
-    private String Id;
-    private long UpdateTimeStamp;
-    private String MasterHotelNum;
-    /// <summary>
-    /// 物理房型信息
-    /// </summary>
-    private long MainRoomId;
 
     /// <summary>
-    /// true:有效 false:无效
+    /// 酒店id
     /// </summary>
-    private Integer DataFlag;
-
-
-    /// <summary>
-    /// 无效原因
-    /// </summary>
-    private String DataFlagRemark;
+    private Long hotelId;
 
     /// <summary>
     /// 房型Id
     /// </summary>
-    private String RoomId;
+    private Long roomId;
+
+    private Long updateTimeStamp;
 
     /// <summary>
     /// 房型名称
     /// <para></para>行政商务房
     /// </summary>
-    private String RoomTypeName;
+    private String roomTypeName;
 
     /// <summary>
     /// 房型英文名称
     /// <para></para>行政商务房
     /// </summary>
-    private String RoomTypeName_En;
+    private String roomTypeName_En;
 
     /// <summary>
     /// 房型归属
     /// <para>标准间</para>
     /// </summary>
-    private String StandardRoomType;
+    private String standardRoomType;
 
     /// <summary>
     /// 房间数
     /// </summary>
-    private Integer RoomQuantity;
+    private Integer roomQuantity;
 
     /// <summary>
     /// 最大入住人数
     /// </summary>
-    private Integer MaxOccupancy;
+    private Integer maxOccupancy;
 
     /// <summary>
     /// 最大儿童数
     /// </summary>
-    private String MaxChild;
+    private String maxChild;
 
     /// <summary>
     /// 面积
     /// </summary>
-    private String AreaRange;
+    private String areaRange;
 
     /// <summary>
     /// 楼层
     /// </summary>
-    private String FloorRange;
+    private String floorRange;
 
     /// <summary>
     /// 窗户类型
     /// </summary>
-    private Integer HasWindow;
+    private Integer hasWindow;
 
     /// <summary>
     /// 卫浴
@@ -92,11 +79,21 @@ public class RoomDetail implements Serializable {
     /// <para>2公共卫浴</para>
     /// <para>unknow未知</para>
     /// </summary>
-    private String BathRoomType;
+    private String bathRoomType;
 
     /// <summary>
     /// 床型信息
     /// </summary>
-    private List<Beds> Beds;
+    private List<Beds> beds;
+
+    /// <summary>
+    /// 照片
+    /// </summary>
+    private List<String> pictures;
+
+    //// <summary>
+    /// 子房间信息
+    /// </summary>
+    private List<SubRoomDetail> subRoom;
 
 }

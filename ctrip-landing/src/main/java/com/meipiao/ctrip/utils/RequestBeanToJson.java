@@ -1,6 +1,8 @@
 package com.meipiao.ctrip.utils;
 
 import com.alibaba.fastjson.JSON;
+import com.meipiao.ctrip.entity.request.book.AvailRequestSegments;
+import com.meipiao.ctrip.entity.request.book.CheckBookReq;
 import com.meipiao.ctrip.entity.request.city.GetCityEntityReq;
 import com.meipiao.ctrip.entity.request.city.SearchByType;
 import com.meipiao.ctrip.entity.request.city.SearchCandidate;
@@ -15,9 +17,6 @@ import com.meipiao.ctrip.entity.request.room.RoomSearchCandidate;
 import com.meipiao.ctrip.entity.request.room.RoomSettings;
 import com.meipiao.ctrip.entity.request.room.SearchTagsItem;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 /**
@@ -27,11 +26,6 @@ import java.util.ArrayList;
  * @Date: 2020/6/12 11:02
  */
 public class RequestBeanToJson {
-
-    public static void main(String[] args) {
-
-
-    }
 
     //获取全量城市信息请求参数(json)
     public static String getCityEntityReq(Integer pageSize, String lastRecordID) {
@@ -197,5 +191,53 @@ public class RequestBeanToJson {
         getPriceEntityReq.setSearchCandidate(incrPriceSearchCandidate);
 
         return JSON.toJSONString(getPriceEntityReq);
+    }
+
+    //查询酒店最低价房型
+    public static String getLowestPrice(Integer city, String checkInDate, String checkOutDate, String hotelList, String lowPrice, String highPrice) {
+        LowestPriceReq lowestPriceReq = new LowestPriceReq();
+
+        SearchTypeEntity searchTypeEntity = new SearchTypeEntity();
+        lowestPriceReq.setSearchTypeEntity(searchTypeEntity);
+
+        PublicSearchParameter publicSearchParameter = new PublicSearchParameter();
+        if (city != 10086) {
+            publicSearchParameter.setCity(city);
+        }
+        publicSearchParameter.setCheckInDate(checkInDate);
+        publicSearchParameter.setCheckOutDate(checkOutDate);
+        publicSearchParameter.setHotelList(hotelList);
+        lowestPriceReq.setPublicSearchParameter(publicSearchParameter);
+
+        PriceRange priceRange = new PriceRange();
+        priceRange.setLowPrice(lowPrice);
+        priceRange.setHighPrice(highPrice);
+
+        FacilityEntity facilityEntity = new FacilityEntity();
+        facilityEntity.setPriceRange(priceRange);
+        lowestPriceReq.setFacilityEntity(facilityEntity);
+
+        OrderBy orderBy = new OrderBy();
+        lowestPriceReq.setOrderBy(orderBy);
+
+        return JSON.toJSONString(lowestPriceReq);
+    }
+
+    //检查房型是否可预订
+    public static String getCheckBookReq(){
+        //最外层
+        CheckBookReq checkBookReq = new CheckBookReq();
+
+        //第二层
+        AvailRequestSegments availRequestSegments = new AvailRequestSegments();
+
+
+
+
+        return null;
+    }
+
+    public static void main(String[] args) {
+
     }
 }

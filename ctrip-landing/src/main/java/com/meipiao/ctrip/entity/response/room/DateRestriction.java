@@ -10,8 +10,8 @@ import java.io.Serializable;
  */
 @Data
 public class DateRestriction implements Serializable {
-    private String Scope;
-    private String DataType;
-    private String Start;
+    private String scope;
+    private String dataType;
+    private String start;
     private String end;
 }
